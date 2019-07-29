@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1564367031457.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4115036473",
+    "id" : "C6BC7708",
+    "lastKnownWriteTime" : 1564367077,
+    "last_content_update" : 1564367077330,
+    "path" : "C:/Users/olljt2/Desktop/academic_web_page/content/post/2019-07-28-introduction-to-phyloseq.Rmd",
+    "project_path" : "content/post/2019-07-28-introduction-to-phyloseq.Rmd",
+    "properties" : {
+        "cursorPosition" : "27,0",
+        "scrollLine" : "15"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

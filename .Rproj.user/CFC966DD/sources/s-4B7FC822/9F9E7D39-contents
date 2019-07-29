@@ -1,0 +1,28 @@
+---
+title: Test
+author: Nick
+date: '2019-07-28'
+slug: test
+categories:
+  - test
+tags:
+  - test
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2019-07-28T22:18:15-04:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+# Testfffff site
+
+<br>
+
+```{r, test}
+2 + 2 
+```
