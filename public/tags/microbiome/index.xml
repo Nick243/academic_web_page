@@ -1,0 +1,1556 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Microbiome on </title>
+    <link>/tags/microbiome/</link>
+    <description>Recent content in Microbiome on </description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 28 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+	    <atom:link href="/tags/microbiome/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Introduction to Phyloseq</title>
+      <link>/post/introduction-to-phyloseq/</link>
+      <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/introduction-to-phyloseq/</guid>
+      <description>
+
+
+&lt;div id=&#34;section&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;This post is from a tutorial demonstrating the processing of amplicon short read data in R taught as part of the &lt;a href=&#34;https://github.com/Nick243/Introduction-to-Metagenomics-Summer-Workshop-2019&#34;&gt;Introduction to Metagenomics Summer Workshop&lt;/a&gt;. It provides a quick introduction some of the functionality provided by phyloseq and follows some of Paul McMurdie’s excellent tutorials. This tutorial picks up where Ben Callahan’s DADA2 tutorial leaves off and highlights some of the main accessor and processor functions of the package. I thought it might be useful to a broader audience so decided to post it.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;The goal of this interactive session is to &lt;strong&gt;introduce you to some of the basic functionality of the&lt;/strong&gt; &lt;a href=&#34;https://www.bioconductor.org/packages/release/bioc/html/phyloseq.html&#34;&gt;phyloseq package&lt;/a&gt; that can help you to explore and better understand your metagenomic data. We will be working with the phyloseq object that was created during the &lt;a href=&#34;http://benjjneb.github.io/dada2/tutorial.html&#34;&gt;DADA2 tutorial&lt;/a&gt;. If you recall, these were murine stool samples collected from a single mouse over time. The phyloseq object contains: an ASV table, sample metadata, taxonomic classifications, and the reference sequences. We did not generate a phylogenetic tree from these sequences, but if we had, it could be included as well.&lt;/p&gt;
+&lt;p&gt;The session will quickly cover some of the basic accessor, analysis and graphical functions available to you when using the phyloseq package in R.&lt;/p&gt;
+&lt;p&gt;To learn more, Paul McMurdie has an excellent set of tutorials that I encourage you to explore.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://joey711.github.io/phyloseq/preprocess.html&#34; class=&#34;uri&#34;&gt;https://joey711.github.io/phyloseq/preprocess.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://joey711.github.io/phyloseq/index.html&#34; class=&#34;uri&#34;&gt;https://joey711.github.io/phyloseq/index.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;loading-required-packages-and-phyloseq-object&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Loading required packages and phyloseq object&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(dada2); packageVersion(&amp;quot;dada2&amp;quot;)           &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: Rcpp&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.12.1&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(phyloseq); packageVersion(&amp;quot;phyloseq&amp;quot;)      &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.28.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ggplot2); packageVersion(&amp;quot;ggplot2&amp;quot;)        &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;3.2.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;If the phyloseq (ps) object is not already loaded into your environment…let’s go ahead and do that now. You will need to change the path so that it maps to the ps object on your computer. No path is needed if you are working in an RStudio project folder (or if you cloned the folder from GitHub).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ps &amp;lt;- readRDS(&amp;quot;C:/Users/olljt2/Desktop/academic_web_page/static/data/ps.rds&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;accessing-the-sample-information-and-sample-metadata&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Accessing the sample information and sample metadata&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ps&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 232 taxa and 19 samples ]
+## sample_data() Sample Data:       [ 19 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 232 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 232 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Here we can see that we have a phyloseq object that consists of:
+&lt;ul&gt;
+&lt;li&gt;An OTU table with 232 taxa and 19 samples&lt;/li&gt;
+&lt;li&gt;A sample metadata file consisting of 4 variables&lt;/li&gt;
+&lt;li&gt;A taxonomy table with 7 ranks&lt;/li&gt;
+&lt;li&gt;Reference sequences on all 232 taxa&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;This highlights one of the key advantages of working with phyloseq objects in R. Each of these data structures is contained in a single object. This makes it easy to keep all of your data together and to share it with colleagues or include it as a supplemental file to a publication.&lt;/p&gt;
+&lt;p&gt;Next we will see how each of the components can be accessed. We will run through several commands below and then discuss the output.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;nsamples(ps)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 19&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sample_names(ps)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;F3D0&amp;quot;   &amp;quot;F3D1&amp;quot;   &amp;quot;F3D141&amp;quot; &amp;quot;F3D142&amp;quot; &amp;quot;F3D143&amp;quot; &amp;quot;F3D144&amp;quot; &amp;quot;F3D145&amp;quot;
+##  [8] &amp;quot;F3D146&amp;quot; &amp;quot;F3D147&amp;quot; &amp;quot;F3D148&amp;quot; &amp;quot;F3D149&amp;quot; &amp;quot;F3D150&amp;quot; &amp;quot;F3D2&amp;quot;   &amp;quot;F3D3&amp;quot;  
+## [15] &amp;quot;F3D5&amp;quot;   &amp;quot;F3D6&amp;quot;   &amp;quot;F3D7&amp;quot;   &amp;quot;F3D8&amp;quot;   &amp;quot;F3D9&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sample_variables(ps)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;Subject&amp;quot; &amp;quot;Gender&amp;quot;  &amp;quot;Day&amp;quot;     &amp;quot;When&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(sample_data(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        Subject Gender Day  When
+## F3D0         3      F   0 Early
+## F3D1         3      F   1 Early
+## F3D141       3      F 141  Late
+## F3D142       3      F 142  Late
+## F3D143       3      F 143  Late
+## F3D144       3      F 144  Late&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sample_data(ps)$When&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot; 
+##  [9] &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot;  &amp;quot;Late&amp;quot;  &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot;
+## [17] &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;table(sample_data(ps)$When)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Early  Late 
+##     9    10&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;median(sample_data(ps)$Day)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 141&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;metadata &amp;lt;- data.frame(sample_data(ps))
+head(metadata)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        Subject Gender Day  When
+## F3D0         3      F   0 Early
+## F3D1         3      F   1 Early
+## F3D141       3      F 141  Late
+## F3D142       3      F 142  Late
+## F3D143       3      F 143  Late
+## F3D144       3      F 144  Late&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we can see that we have 19 samples and they are assigned the sample names we gave them during the DADA2 tutorial.
+We also have 4 variables (Subject, Gender, Day, and When) and that information can be easily accessed and computations or descriptive statistics performed.
+Specific components of the ps object can be extracted and converted to a data.frame for additional analyses.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;examining-the-number-of-reads-for-each-sample&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Examining the number of reads for each sample&lt;/h1&gt;
+&lt;p&gt;Phyloseq makes it easy to calculate the total number of reads for each sample, sort them to identify potentially problematic samples, and plot their distribution.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sample_sums(ps)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   F3D0   F3D1 F3D141 F3D142 F3D143 F3D144 F3D145 F3D146 F3D147 F3D148 
+##   6528   5017   4863   2521   2518   3488   5820   3879  13006   9935 
+## F3D149 F3D150   F3D2   F3D3   F3D5   F3D6   F3D7   F3D8   F3D9 
+##  10653   4240  16835   5491   3716   6679   4217   4547   6015&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sort(sample_sums(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## F3D143 F3D142 F3D144   F3D5 F3D146   F3D7 F3D150   F3D8 F3D141   F3D1 
+##   2518   2521   3488   3716   3879   4217   4240   4547   4863   5017 
+##   F3D3 F3D145   F3D9   F3D0   F3D6 F3D148 F3D149 F3D147   F3D2 
+##   5491   5820   6015   6528   6679   9935  10653  13006  16835&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;hist(sample_sums(ps), main=&amp;quot;Histogram: Read Counts&amp;quot;, xlab=&amp;quot;Total Reads&amp;quot;, 
+     border=&amp;quot;blue&amp;quot;, col=&amp;quot;green&amp;quot;, las=1, breaks=12)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-phyloseq_files/figure-html/number%20of%20reads-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;metadata$total_reads &amp;lt;- sample_sums(ps)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we see that the number of reads per sample ranges from 2,518 to 16,835 and most samples have less than 10k reads. &lt;em&gt;Try to calculate the mean and median number of reads on your own.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;The last line of code above can be used to add a new column containing the total read count to the metadata data.frame. Similarly, sample_data(ps)$total_reads &amp;lt;- sample_sums(ps) would add this information to the phyloseq object itself (as a new sample_data variable).&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;examining-the-otu-table&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Examining the OTU table&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ntaxa(ps)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 232&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(taxa_names(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;ASV1&amp;quot; &amp;quot;ASV2&amp;quot; &amp;quot;ASV3&amp;quot; &amp;quot;ASV4&amp;quot; &amp;quot;ASV5&amp;quot; &amp;quot;ASV6&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(taxa_sums(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  ASV1  ASV2  ASV3  ASV4  ASV5  ASV6 
+## 14148  9898  8862  7935  5880  5469&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(asv_tab &amp;lt;- data.frame(otu_table(ps)[1:5, 1:5]))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        ASV1 ASV2 ASV3 ASV4 ASV5
+## F3D0    579  345  449  430  154
+## F3D1    405  353  231   69  140
+## F3D141  444  362  345  502  189
+## F3D142  289  304  158  164  180
+## F3D143  228  176  204  231  130&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;Phyloseq allows you to easily:
+&lt;ul&gt;
+&lt;li&gt;Obtain a count of the number of taxa&lt;/li&gt;
+&lt;li&gt;Access their names (e.g. ASV1, ASV2, …)&lt;/li&gt;
+&lt;li&gt;Get a count of each ASV summed over all samples&lt;/li&gt;
+&lt;li&gt;Extract the OTU table as a data.frame&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;examining-the-taxonomy&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Examining the taxonomy&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rank_names(ps)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;Kingdom&amp;quot; &amp;quot;Phylum&amp;quot;  &amp;quot;Class&amp;quot;   &amp;quot;Order&amp;quot;   &amp;quot;Family&amp;quot;  &amp;quot;Genus&amp;quot;   &amp;quot;Species&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(tax_table(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Taxonomy Table:     [6 taxa by 7 taxonomic ranks]:
+##      Kingdom    Phylum          Class         Order          
+## ASV1 &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+## ASV2 &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+## ASV3 &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+## ASV4 &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+## ASV5 &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+## ASV6 &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+##      Family           Genus         Species
+## ASV1 &amp;quot;Muribaculaceae&amp;quot; NA            NA     
+## ASV2 &amp;quot;Muribaculaceae&amp;quot; NA            NA     
+## ASV3 &amp;quot;Muribaculaceae&amp;quot; NA            NA     
+## ASV4 &amp;quot;Muribaculaceae&amp;quot; NA            NA     
+## ASV5 &amp;quot;Bacteroidaceae&amp;quot; &amp;quot;Bacteroides&amp;quot; NA     
+## ASV6 &amp;quot;Muribaculaceae&amp;quot; NA            NA&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(tax_table(ps)[, 2])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Taxonomy Table:     [6 taxa by 1 taxonomic ranks]:
+##      Phylum         
+## ASV1 &amp;quot;Bacteroidetes&amp;quot;
+## ASV2 &amp;quot;Bacteroidetes&amp;quot;
+## ASV3 &amp;quot;Bacteroidetes&amp;quot;
+## ASV4 &amp;quot;Bacteroidetes&amp;quot;
+## ASV5 &amp;quot;Bacteroidetes&amp;quot;
+## ASV6 &amp;quot;Bacteroidetes&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;table(tax_table(ps)[, 2])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##      Actinobacteria       Bacteroidetes       Cyanobacteria 
+##                   6                  20                   3 
+## Deinococcus-Thermus  Epsilonbacteraeota          Firmicutes 
+##                   1                   1                 185 
+##     Patescibacteria      Proteobacteria         Tenericutes 
+##                   2                   7                   6 
+##     Verrucomicrobia 
+##                   1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(tax_tab &amp;lt;- data.frame(tax_table(ps)[50:55, ]))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        Kingdom             Phylum           Class             Order
+## ASV50 Bacteria         Firmicutes      Clostridia     Clostridiales
+## ASV51 Bacteria         Firmicutes      Clostridia     Clostridiales
+## ASV52 Bacteria         Firmicutes      Clostridia     Clostridiales
+## ASV53 Bacteria Epsilonbacteraeota Campylobacteria Campylobacterales
+## ASV54 Bacteria         Firmicutes      Clostridia     Clostridiales
+## ASV55 Bacteria         Firmicutes      Clostridia     Clostridiales
+##                  Family                   Genus Species
+## ASV50   Lachnospiraceae           Acetatifactor    &amp;lt;NA&amp;gt;
+## ASV51   Ruminococcaceae     Ruminiclostridium_5    &amp;lt;NA&amp;gt;
+## ASV52   Lachnospiraceae Lachnospiraceae_UCG-001    &amp;lt;NA&amp;gt;
+## ASV53 Helicobacteraceae            Helicobacter  pylori
+## ASV54       Family_XIII                    &amp;lt;NA&amp;gt;    &amp;lt;NA&amp;gt;
+## ASV55   Ruminococcaceae     Ruminiclostridium_5    &amp;lt;NA&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we can see that we have information on 7 taxonomic ranks from Kingdom to Species. We can easily access specific components of this object to learn more about the classifications. For example, we see that the vast majority of ASVs are classified as Firmicutes. This is in line with our expectations. Conducting such assessments may help you identify potential sequencing errors that made it through the denoising pipeline (i.e. those not assigned to a Kingdom) or to understand the proportion of sequences classified at lower levels (i.e. genus or species).&lt;/p&gt;
+&lt;p&gt;One could also swap out this taxonomy file for another…say using the &lt;a href=&#34;https://rdrr.io/bioc/DECIPHER/man/IdTaxa.html&#34;&gt;IDTAXA&lt;/a&gt; function in the &lt;a href=&#34;http://www.bioconductor.org/packages/release/bioc/html/DECIPHER.html&#34;&gt;DECIPHER&lt;/a&gt; package or an alternative reference database (i.e. Silva or Greengenes). &lt;em&gt;I will let you look into this on your own!&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;examining-the-reference-sequences&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Examining the reference sequences&lt;/h1&gt;
+&lt;p&gt;Storing the reference sequences with your phyloseq object is critical of you rename the ASV names to ASV1, ASV2, …
+This will allow you to communicate the information on these ASVs directly (i.e. you can provide the exact sequence variant information). This information is also required to build a phylogenetic tree or BLAST the sequences against the NCBI database for example. &lt;strong&gt;In short, always include these in the phyloseq object.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Below we see that these sequences are stored as a DNAStringSet. The refseq command returns the ASV number, sequence length, and amplicon sequence for each ASV. The function &lt;a href=&#34;https://rdrr.io/bioc/dada2/man/nwhamming.html&#34;&gt;dada2::nwhamming&lt;/a&gt; is calculating the Hamming distance of two sequences after alignment. We will discuss more about this in class. We can also pull out the component and store it as a data.frame.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(refseq(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   A DNAStringSet instance of length 6
+##     width seq                                          names               
+## [1]   252 TACGGAGGATGCGAGCGTTAT...AAGTGTGGGTATCGAACAGG ASV1
+## [2]   252 TACGGAGGATGCGAGCGTTAT...AAGCGTGGGTATCGAACAGG ASV2
+## [3]   252 TACGGAGGATGCGAGCGTTAT...AAGCGTGGGTATCGAACAGG ASV3
+## [4]   252 TACGGAGGATGCGAGCGTTAT...AAGTGCGGGGATCGAACAGG ASV4
+## [5]   253 TACGGAGGATCCGAGCGTTAT...AAGTGTGGGTATCAAACAGG ASV5
+## [6]   252 TACGGAGGATGCGAGCGTTAT...AAGTGCGGGGATCAAACAGG ASV6&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dada2::nwhamming(as.vector(refseq(ps)[1]), as.vector(refseq(ps)[2]))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 20&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ref_tab &amp;lt;- data.frame(head(refseq(ps))))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##                                                                                                                                                                                                                                                   head.refseq.ps..
+## ASV1  TACGGAGGATGCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGTGCGCAGGCGGAAGATCAAGTCAGCGGTAAAATTGAGAGGCTCAACCTCTTCGAGCCGTTGAAACTGGTTTTCTTGAGTGAGCGAGAAGTATGCGGAATGCGTGGTGTAGCGGTGAAATGCATAGATATCACGCAGAACTCCGATTGCGAAGGCAGCATACCGGCGCTCAACTGACGCTCATGCACGAAAGTGTGGGTATCGAACAGG
+## ASV2  TACGGAGGATGCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGTGCGCAGGCGGACTCTCAAGTCAGCGGTCAAATCGCGGGGCTCAACCCCGTTCCGCCGTTGAAACTGGGAGCCTTGAGTGCGCGAGAAGTAGGCGGAATGCGTGGTGTAGCGGTGAAATGCATAGATATCACGCAGAACTCCGATTGCGAAGGCAGCCTACCGGCGCGCAACTGACGCTCATGCACGAAAGCGTGGGTATCGAACAGG
+## ASV3  TACGGAGGATGCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGTGCGTAGGCGGGCTGTTAAGTCAGCGGTCAAATGTCGGGGCTCAACCCCGGCCTGCCGTTGAAACTGGCGGCCTCGAGTGGGCGAGAAGTATGCGGAATGCGTGGTGTAGCGGTGAAATGCATAGATATCACGCAGAACTCCGATTGCGAAGGCAGCATACCGGCGCCCGACTGACGCTGAGGCACGAAAGCGTGGGTATCGAACAGG
+## ASV4  TACGGAGGATGCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGTGCGTAGGCGGGCTTTTAAGTCAGCGGTAAAAATTCGGGGCTCAACCCCGTCCGGCCGTTGAAACTGGGGGCCTTGAGTGGGCGAGAAGAAGGCGGAATGCGTGGTGTAGCGGTGAAATGCATAGATATCACGCAGAACCCCGATTGCGAAGGCAGCCTTCCGGCGCCCTACTGACGCTGAGGCACGAAAGTGCGGGGATCGAACAGG
+## ASV5 TACGGAGGATCCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGGTGGATTGTTAAGTCAGTTGTGAAAGTTTGCGGCTCAACCGTAAAATTGCAGTTGAAACTGGCAGTCTTGAGTACAGTAGAGGTGGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCTCACTGGACTGCAACTGACACTGATGCTCGAAAGTGTGGGTATCAAACAGG
+## ASV6  TACGGAGGATGCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGTGCGTAGGCGGCCTGCCAAGTCAGCGGTAAAATTGCGGGGCTCAACCCCGTACAGCCGTTGAAACTGCCGGGCTCGAGTGGGCGAGAAGTATGCGGAATGCGTGGTGTAGCGGTGAAATGCATAGATATCACGCAGAACCCCGATTGCGAAGGCAGCATACCGGCGCCCTACTGACGCTGAGGCACGAAAGTGCGGGGATCAAACAGG&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;accessing-the-phylogenetic-tree&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Accessing the phylogenetic tree&lt;/h1&gt;
+&lt;p&gt;We did not generate a phylogenetic tree during the DADA2 tutorial in the interest of time. However, phyloseq has many excellent tools for working with and visualizing trees. I recommend you take a look at these tutorials below for some examples.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://joey711.github.io/phyloseq/preprocess.html&#34; class=&#34;uri&#34;&gt;https://joey711.github.io/phyloseq/preprocess.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://joey711.github.io/phyloseq/plot_tree-examples.html&#34; class=&#34;uri&#34;&gt;https://joey711.github.io/phyloseq/plot_tree-examples.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Ben Callahan’s &lt;a href=&#34;https://f1000research.com/articles/5-1492&#34;&gt;F1000&lt;/a&gt; paper demonstrates a complete analysis workflow in R including the construction of a de-novo phylogenetic tree. I highly recommned you take a look at this paper.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;agglomerating-and-subsetting-taxa&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Agglomerating and subsetting taxa&lt;/h1&gt;
+&lt;p&gt;Often times we may want to agglomerate taxa to a specific taxonomic rank for analysis. Or we may want to work with a given subset of taxa. We can perform these operations in phyloseq with the tax_glom and subset_taxa functions.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps_phylum &amp;lt;- tax_glom(ps, &amp;quot;Phylum&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 10 taxa and 19 samples ]
+## sample_data() Sample Data:       [ 19 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 10 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 10 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;taxa_names(ps_phylum)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;ASV1&amp;quot;   &amp;quot;ASV11&amp;quot;  &amp;quot;ASV19&amp;quot;  &amp;quot;ASV53&amp;quot;  &amp;quot;ASV67&amp;quot;  &amp;quot;ASV90&amp;quot;  &amp;quot;ASV107&amp;quot;
+##  [8] &amp;quot;ASV109&amp;quot; &amp;quot;ASV189&amp;quot; &amp;quot;ASV191&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;taxa_names(ps_phylum) &amp;lt;- tax_table(ps_phylum)[, 2]
+taxa_names(ps_phylum)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##  [1] &amp;quot;Bacteroidetes&amp;quot;       &amp;quot;Firmicutes&amp;quot;          &amp;quot;Tenericutes&amp;quot;        
+##  [4] &amp;quot;Epsilonbacteraeota&amp;quot;  &amp;quot;Actinobacteria&amp;quot;      &amp;quot;Patescibacteria&amp;quot;    
+##  [7] &amp;quot;Proteobacteria&amp;quot;      &amp;quot;Deinococcus-Thermus&amp;quot; &amp;quot;Cyanobacteria&amp;quot;      
+## [10] &amp;quot;Verrucomicrobia&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;otu_table(ps_phylum)[1:5, c(1:3, 5, 7)]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## OTU Table:          [5 taxa and 5 samples]
+##                      taxa are columns
+##        Bacteroidetes Firmicutes Tenericutes Actinobacteria Proteobacteria
+## F3D0            3708       2620         151             27             12
+## F3D1            1799       3011         157              3             16
+## F3D141          3437       1370          35             16              0
+## F3D142          2003        452          33             28              0
+## F3D143          1816        655          34             10              0&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we are agglomerating the counts to the Phylum-level and then renaming the ASVs to make them more descriptive.
+We can see that we have 10 Phyla. The ASV information (i.e. refseq and taxonomy for one of the ASVs in each Phylum) gets carried along for the ride (we can typically ignore this or you can remove these components if you prefer).&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;div id=&#34;we-can-also-subset-taxa&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;We can also subset taxa…&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps_bacteroides &amp;lt;- subset_taxa(ps, Genus == &amp;quot;Bacteroides&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 3 taxa and 19 samples ]
+## sample_data() Sample Data:       [ 19 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 3 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 3 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;tax_table(ps_bacteroides)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Taxonomy Table:     [3 taxa by 7 taxonomic ranks]:
+##        Kingdom    Phylum          Class         Order          
+## ASV5   &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+## ASV80  &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+## ASV163 &amp;quot;Bacteria&amp;quot; &amp;quot;Bacteroidetes&amp;quot; &amp;quot;Bacteroidia&amp;quot; &amp;quot;Bacteroidales&amp;quot;
+##        Family           Genus         Species   
+## ASV5   &amp;quot;Bacteroidaceae&amp;quot; &amp;quot;Bacteroides&amp;quot; NA        
+## ASV80  &amp;quot;Bacteroidaceae&amp;quot; &amp;quot;Bacteroides&amp;quot; &amp;quot;vulgatus&amp;quot;
+## ASV163 &amp;quot;Bacteroidaceae&amp;quot; &amp;quot;Bacteroides&amp;quot; &amp;quot;vulgatus&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;prune_taxa(taxa_sums(ps) &amp;gt; 100, ps) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 99 taxa and 19 samples ]
+## sample_data() Sample Data:       [ 19 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 99 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 99 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;filter_taxa(ps, function(x) sum(x &amp;gt; 10) &amp;gt; (0.1*length(x)), TRUE)   &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 135 taxa and 19 samples ]
+## sample_data() Sample Data:       [ 19 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 135 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 135 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;With the above commands we can quickly see that we have:
+&lt;ul&gt;
+&lt;li&gt;A total of 3 ASVs classified as Bacteroides&lt;/li&gt;
+&lt;li&gt;A total of 99 ASVs seen at least 100 times across all samples&lt;/li&gt;
+&lt;li&gt;A total of 135 taxa seen at least 10 times in at least 10% of samples&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;This highlights how we might use phyloseq as a tool to filter taxa prior to statistical analysis.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;subsetting-samples-and-tranforming-counts&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Subsetting samples and tranforming counts&lt;/h1&gt;
+&lt;p&gt;Phyloseq can also be used to subset all the individual components based on sample metadata information. &lt;strong&gt;This would take a fair bit of work to do properly if we were working with each individual component…and not with phyloseq.&lt;/strong&gt; Below we subset the early stool samples. Then we generate an object that includes only samples with &amp;gt; 5,000 total reads.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ps_early &amp;lt;- subset_samples(ps, When == &amp;quot;Early&amp;quot;)
+(ps_early = prune_taxa(taxa_sums(ps_early) &amp;gt; 0, ps_early))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 183 taxa and 9 samples ]
+## sample_data() Sample Data:       [ 9 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 183 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 183 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sample_data(ps_early)$When&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot; &amp;quot;Early&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sort(sample_sums(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## F3D143 F3D142 F3D144   F3D5 F3D146   F3D7 F3D150   F3D8 F3D141   F3D1 
+##   2518   2521   3488   3716   3879   4217   4240   4547   4863   5017 
+##   F3D3 F3D145   F3D9   F3D0   F3D6 F3D148 F3D149 F3D147   F3D2 
+##   5491   5820   6015   6528   6679   9935  10653  13006  16835&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps_reads_GT_5k = prune_samples(sample_sums(ps) &amp;gt; 5000, ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 232 taxa and 10 samples ]
+## sample_data() Sample Data:       [ 10 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 232 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 232 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sort(sample_sums(ps_reads_GT_5k))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   F3D1   F3D3 F3D145   F3D9   F3D0   F3D6 F3D148 F3D149 F3D147   F3D2 
+##   5017   5491   5820   6015   6528   6679   9935  10653  13006  16835&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Counts can be converted to relative abundances (e.g. total sum scaling) using the transform_sample_counts function. They can also be subsampled/rarified using the rarefy_even_depth function. However, subsampling to account for differences in sequencing depth acorss samples has important limitations. See the papers below for a more in-depth discussion.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003531&#34;&gt;McMurdie and Holmes, Waste Not, Want Not: Why Rarefying Microbiome Data Is Inadmissible&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0237-y&#34;&gt;Weiss et. al., Normalization and microbial differential abundance strategies depend upon data characteristics&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ps_relabund &amp;lt;- transform_sample_counts(ps, function(x) x / sum(x))
+otu_table(ps_relabund)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## OTU Table:          [5 taxa and 5 samples]
+##                      taxa are columns
+##              ASV1       ASV2       ASV3       ASV4       ASV5
+## F3D0   0.08869485 0.05284926 0.06878064 0.06587010 0.02359069
+## F3D1   0.08072553 0.07036077 0.04604345 0.01375324 0.02790512
+## F3D141 0.09130167 0.07443965 0.07094386 0.10322846 0.03886490
+## F3D142 0.11463705 0.12058707 0.06267354 0.06505355 0.07140024
+## F3D143 0.09054805 0.06989674 0.08101668 0.09173948 0.05162828&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps_rare &amp;lt;- rarefy_even_depth(ps, sample.size = 4000, rngseed = 123, replace = FALSE))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## `set.seed(123)` was used to initialize repeatable random subsampling.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Please record this for your records so others can reproduce.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Try `set.seed(123); .Random.seed` for the full vector&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ...&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 5 samples removedbecause they contained fewer reads than `sample.size`.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Up to first five removed samples are:&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## F3D142F3D143F3D144F3D146F3D5&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ...&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 15OTUs were removed because they are no longer 
+## present in any sample after random subsampling&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ...&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 217 taxa and 14 samples ]
+## sample_data() Sample Data:       [ 14 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 217 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 217 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sample_sums(ps_rare)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##   F3D0   F3D1 F3D141 F3D145 F3D147 F3D148 F3D149 F3D150   F3D2   F3D3 
+##   4000   4000   4000   4000   4000   4000   4000   4000   4000   4000 
+##   F3D6   F3D7   F3D8   F3D9 
+##   4000   4000   4000   4000&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;example-analytic-and-graphical-capabilities&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Example analytic and graphical capabilities&lt;/h1&gt;
+&lt;p&gt;Phyloseq has an extensive list of functions for processing and analyzing microbiome data. I recommend you view the tutorial section on the phyloseq home page to get a feel for all that phyloseq can do. Below are just a few quick examples. We will get more into these types of analyses in subsequent sessions.&lt;/p&gt;
+&lt;div id=&#34;alpha-diversity&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Alpha-diversity&lt;/h3&gt;
+&lt;p&gt;Below we will receive a warning that our data does not contain any singletons and that the results of richness estimates are probably unreliable. This is an important point and we will delve into this issue more in the next session. For now, you can go ahead and ignore the warning.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(estimate_richness(ps))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in estimate_richness(ps): The data you have provided does not have
+## any singletons. This is highly suspicious. Results of richness
+## estimates (for example) are probably unreliable, or wrong, if you have already
+## trimmed low-abundance taxa from the data.
+## 
+## We recommended that you find the un-trimmed data and retry.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        Observed Chao1 se.chao1 ACE   se.ACE  Shannon   Simpson InvSimpson
+## F3D0        106   106        0 106 4.539138 3.865881 0.9644889   28.16024
+## F3D1        100   100        0 100 4.208325 3.993196 0.9709838   34.46347
+## F3D141       74    74        0  74 3.878214 3.428895 0.9501123   20.04502
+## F3D142       48    48        0  48 3.388092 3.117940 0.9386949   16.31185
+## F3D143       56    56        0  56 3.543102 3.292717 0.9464422   18.67141
+## F3D144       47    47        0  47 3.135249 2.994201 0.9309895   14.49054
+##           Fisher
+## F3D0   17.973004
+## F3D1   17.696857
+## F3D141 12.383762
+## F3D142  8.412094
+## F3D143 10.148818
+## F3D144  7.678694&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(p &amp;lt;- plot_richness(ps, x = &amp;quot;When&amp;quot;, color = &amp;quot;When&amp;quot;, measures = c(&amp;quot;Observed&amp;quot;, &amp;quot;Shannon&amp;quot;)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in estimate_richness(physeq, split = TRUE, measures = measures): The data you have provided does not have
+## any singletons. This is highly suspicious. Results of richness
+## estimates (for example) are probably unreliable, or wrong, if you have already
+## trimmed low-abundance taxa from the data.
+## 
+## We recommended that you find the un-trimmed data and retry.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-phyloseq_files/figure-html/adiv-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p + labs(x = &amp;quot;&amp;quot;, y = &amp;quot;Alpha Diversity Measure\n&amp;quot;) + 
+  theme_bw()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-phyloseq_files/figure-html/adiv-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;beta-diversity-ordination&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Beta-diversity ordination&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ps_rare_bray &amp;lt;- ordinate(ps_rare, &amp;quot;NMDS&amp;quot;, &amp;quot;bray&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Square root transformation
+## Wisconsin double standardization
+## Run 0 stress 0.08484704 
+## Run 1 stress 0.08484704 
+## ... New best solution
+## ... Procrustes: rmse 2.497137e-06  max resid 5.691675e-06 
+## ... Similar to previous best
+## Run 2 stress 0.09657264 
+## Run 3 stress 0.08484704 
+## ... Procrustes: rmse 7.186183e-07  max resid 1.423558e-06 
+## ... Similar to previous best
+## Run 4 stress 0.08484704 
+## ... Procrustes: rmse 3.303025e-06  max resid 7.565974e-06 
+## ... Similar to previous best
+## Run 5 stress 0.1744901 
+## Run 6 stress 0.08484704 
+## ... Procrustes: rmse 1.008148e-06  max resid 2.038791e-06 
+## ... Similar to previous best
+## Run 7 stress 0.08484704 
+## ... Procrustes: rmse 1.776536e-06  max resid 3.520974e-06 
+## ... Similar to previous best
+## Run 8 stress 0.09657264 
+## Run 9 stress 0.08484704 
+## ... Procrustes: rmse 8.550518e-07  max resid 1.794331e-06 
+## ... Similar to previous best
+## Run 10 stress 0.08484704 
+## ... Procrustes: rmse 1.376679e-06  max resid 2.816876e-06 
+## ... Similar to previous best
+## Run 11 stress 0.08484704 
+## ... Procrustes: rmse 4.702272e-06  max resid 8.17489e-06 
+## ... Similar to previous best
+## Run 12 stress 0.08484704 
+## ... New best solution
+## ... Procrustes: rmse 2.157179e-07  max resid 4.2813e-07 
+## ... Similar to previous best
+## Run 13 stress 0.08484704 
+## ... Procrustes: rmse 1.726469e-06  max resid 3.270828e-06 
+## ... Similar to previous best
+## Run 14 stress 0.08484704 
+## ... Procrustes: rmse 1.055175e-06  max resid 2.649077e-06 
+## ... Similar to previous best
+## Run 15 stress 0.09657265 
+## Run 16 stress 0.1751066 
+## Run 17 stress 0.08484704 
+## ... Procrustes: rmse 6.953774e-07  max resid 1.374792e-06 
+## ... Similar to previous best
+## Run 18 stress 0.09584961 
+## Run 19 stress 0.08484704 
+## ... Procrustes: rmse 5.428812e-06  max resid 1.248684e-05 
+## ... Similar to previous best
+## Run 20 stress 0.1795526 
+## *** Solution reached&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_ordination(ps_rare, ps_rare_bray, type=&amp;quot;samples&amp;quot;, color=&amp;quot;When&amp;quot;) + geom_point(size = 3) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-phyloseq_files/figure-html/bdiv-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;stacked-bar-plots&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Stacked bar plots&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_bar(ps, fill=&amp;quot;Phylum&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-phyloseq_files/figure-html/taxplot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_bar(ps_relabund, fill=&amp;quot;Phylum&amp;quot;) + 
+  geom_bar(aes(color = Phylum, fill = Phylum), stat=&amp;quot;identity&amp;quot;, position=&amp;quot;stack&amp;quot;) +
+  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;Relative Abundance\n&amp;quot;) +
+  theme(panel.background = element_blank())&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-phyloseq_files/figure-html/taxplot-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;heatmaps&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Heatmaps&lt;/h3&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps_fam &amp;lt;- tax_glom(ps, &amp;quot;Family&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 33 taxa and 19 samples ]
+## sample_data() Sample Data:       [ 19 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 33 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 33 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps_fam_rare &amp;lt;- rarefy_even_depth(ps_fam, sample.size = 4000, rngseed = 123, replace = FALSE))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## `set.seed(123)` was used to initialize repeatable random subsampling.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Please record this for your records so others can reproduce.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Try `set.seed(123); .Random.seed` for the full vector&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ...&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 5 samples removedbecause they contained fewer reads than `sample.size`.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Up to first five removed samples are:&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## F3D142F3D143F3D144F3D146F3D5&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ...&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 9OTUs were removed because they are no longer 
+## present in any sample after random subsampling&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ...&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 24 taxa and 14 samples ]
+## sample_data() Sample Data:       [ 14 samples by 4 sample variables ]
+## tax_table()   Taxonomy Table:    [ 24 taxa by 7 taxonomic ranks ]
+## refseq()      DNAStringSet:      [ 24 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot_heatmap(ps_fam_rare, sample.label = &amp;quot;When&amp;quot;, taxa.label = &amp;quot;Family&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: Transformation introduced infinite values in discrete y-axis&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-phyloseq_files/figure-html/heatmap-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Introduction to the Statistical Analysis of Microbiome Data in R</title>
+      <link>/post/introduction-to-the-statistical-analysis-of-microbiome-data-in-r/</link>
+      <pubDate>Sun, 28 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/introduction-to-the-statistical-analysis-of-microbiome-data-in-r/</guid>
+      <description>
+
+
+&lt;div id=&#34;section&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;This post is also from the &lt;a href=&#34;https://github.com/Nick243/Introduction-to-Metagenomics-Summer-Workshop-2019&#34;&gt;Introduction to Metagenomics Summer Workshop&lt;/a&gt; and provides a quick introduction to some common analytic methods used to analyze microbiome data. I thought it might be of interest to a broader audience so decided to post it here.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;The goal of this session is to provide you with a &lt;strong&gt;high-level introduction&lt;/strong&gt; to some common analytic methods used to analyze microbiome data. It will also serve to introduce you several popular R packages developed specifically for microbiome data analysis. We chose to emphasize R for this course because of the rapid development of methods and packages provided in the R language, the breadth of existing tutorials and resources, and the ever expanding community of R users. However, other platforms such as &lt;a href=&#34;https://qiime2.org/&#34;&gt;QIIME2&lt;/a&gt;, &lt;a href=&#34;https://bitbucket.org/biobakery/biobakery/wiki/Home&#34;&gt;biobakery&lt;/a&gt; and &lt;a href=&#34;https://www.drive5.com/usearch/&#34;&gt;USEARCH&lt;/a&gt;, just to name a few, offer &lt;em&gt;excellent integrated solutions&lt;/em&gt; for the processing and analysis of amplicon and/or shotgun metagenomic sequence data.&lt;/p&gt;
+&lt;p&gt;The diverse goals and technical variation of metagenomic research projects does not allow for a standard &lt;strong&gt;“analytic pipeline”&lt;/strong&gt; for microbiome data analysis. Approaching the analysis of microbiome data with a single workflow in mind is generally not a great idea, as there is no &lt;em&gt;“one size fits all”&lt;/em&gt; solution for the assorted set of questions one might want to answer. However, you may be surprised to find that projects on very different topics often have overarching analytic aims such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Describing the microbial community composition of a set of samples&lt;/li&gt;
+&lt;li&gt;Estimating within- and between-sample diversity&lt;/li&gt;
+&lt;li&gt;Identifying differentially abundant taxa&lt;/li&gt;
+&lt;li&gt;Predicting a response from a set of taxonomic features&lt;/li&gt;
+&lt;li&gt;Assessing microbial network structures and patterns of co-occurance&lt;/li&gt;
+&lt;li&gt;Exploring the phylogenetic relatedness of a set of organisms&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We will cover statistical methods developed to address several of these aims with a focus on introducing you to their implementation in R. A detailed description of each approach, its assumptions, package options, etc. is beyond the scope of this session. However, I try to provide links to source materials and more detailed documentation where possible. &lt;strong&gt;The statistical analysis of microbial metagenomic sequence data is a rapidly evolving field&lt;/strong&gt; and different solutions (often many) have been proposed to answer the same questions. I have tried to focus on methods that are common in the microbiome literature, well-documented, and reasonably accessible…and a few I think are new and interesting. I also try to show a few different approaches in each section. In cases where I focus largely on more basic implementations, I have tried to provide links for advanced learning of more complex topics.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;The publicly available data used in this session are from Giloteaux et. al. &lt;a href=&#34;https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0171-4&#34;&gt;Reduced diversity and altered composition of the gut microbiome in individuals with myalgic encephalomyelitis/chronic fatigue syndrome&lt;/a&gt; published in Microbiome (2016). The metadata, OTU table, and taxonomy files were obtained from the QIIME2 tutorial &lt;a href=&#34;https://docs.qiime2.org/2019.4/tutorials/gneiss/&#34;&gt;Differential abundance analysis with gneiss&lt;/a&gt; (accessed on 06/13/2019). The code and data used to generate the phyloseq object is provided on my &lt;a href=&#34;https://github.com/Nick243/Create-Giloteaux-2016-Phyloseq-Object&#34;&gt;GitHub page&lt;/a&gt;.
+The data were generated by 16S rRNA gene sequencing (V4 hypervariable region) of fecal samples on the Illumina MiSeq. Our focus will be on examining differences in the microbiota of patients with chronic fatigue syndrome versus healthy controls. We will examine:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Taxonomic relative abundance&lt;/li&gt;
+&lt;li&gt;Hierarchal clustering&lt;/li&gt;
+&lt;li&gt;Alpha-diversity&lt;/li&gt;
+&lt;li&gt;Beta-diversity&lt;/li&gt;
+&lt;li&gt;Differential abundance testing&lt;/li&gt;
+&lt;li&gt;Predicting class labels&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;additional-resources&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Additional resources&lt;/h1&gt;
+&lt;p&gt;There are many great resources for conducting microbiome data analysis in R. &lt;a href=&#34;https://www.springer.com/gp/book/9789811315336&#34;&gt;Statistical Analysis of Microbiome Data in R&lt;/a&gt; by Xia, Sun, and Chen (2018) is an excellent textbook in this area. For those looking for an end-to-end workflow for amplicon data in R, I highly recommend Ben Callahan’s F1000 Research paper &lt;a href=&#34;https://f1000research.com/articles/5-1492&#34;&gt;Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses&lt;/a&gt;. In addition there are numerous websites and vignettes dedicated to microbiome analyses. A few include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Paul McMurdie’s phyloseq &lt;a href=&#34;https://joey711.github.io/phyloseq/&#34;&gt;website&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Robert Edgar’s &lt;a href=&#34;https://www.drive5.com/usearch/manual/&#34;&gt;website&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;The microbiome R package &lt;a href=&#34;https://microbiome.github.io/microbiome/&#34;&gt;website&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;All the materials and resources posted on the STAMPS &lt;a href=&#34;https://github.com/mblstamps/stamps2018/wiki&#34;&gt;wiki page&lt;/a&gt; (a course I highly recommend!)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;installing-packages&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Installing packages&lt;/h1&gt;
+&lt;p&gt;The code below will install the packages needed to run the analyses. These packages are installed from &lt;a href=&#34;https://cran.r-project.org/&#34;&gt;CRAN&lt;/a&gt;, &lt;a href=&#34;https://www.bioconductor.org/&#34;&gt;Bioconductor&lt;/a&gt; and from developer &lt;a href=&#34;https://github.com/&#34;&gt;GitHub&lt;/a&gt; sites. Several of these packages are large, and have many dependencies, so this will take some time. This code was modified from Ben’s Bioconductor paper.&lt;/p&gt;
+&lt;p&gt;In general, package management and versioning can be a challenge for those new to R. Inevitably, if you do not take steps ahead of time, you will find that one of your programs that ran fine just a few months ago, no longer works! Often this is because changes in new versions of packages or R caused your code to break. There are multiple solutions depending on your goals, and all come with pros and cons, but a good place to start is to learn more about &lt;a href=&#34;https://rstudio.github.io/packrat/&#34;&gt;Packrat&lt;/a&gt; and other package management tools.&lt;/p&gt;
+&lt;p&gt;If you already have many/some of these packages installed on your local system, you may want to skip this step and install manually only those that you need.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;.cran_packages &amp;lt;- c(&amp;quot;tidyverse&amp;quot;, &amp;quot;cowplot&amp;quot;, &amp;quot;picante&amp;quot;, &amp;quot;vegan&amp;quot;, &amp;quot;HMP&amp;quot;, &amp;quot;dendextend&amp;quot;, &amp;quot;rms&amp;quot;, &amp;quot;devtools&amp;quot;)
+.bioc_packages &amp;lt;- c(&amp;quot;phyloseq&amp;quot;, &amp;quot;DESeq2&amp;quot;, &amp;quot;microbiome&amp;quot;, &amp;quot;metagenomeSeq&amp;quot;, &amp;quot;ALDEx2&amp;quot;)
+.inst &amp;lt;- .cran_packages %in% installed.packages()
+if(any(!.inst)) {
+  install.packages(.cran_packages[!.inst])
+}
+if (!requireNamespace(&amp;quot;BiocManager&amp;quot;, quietly = TRUE))
+  install.packages(&amp;quot;BiocManager&amp;quot;)
+BiocManager::install(.bioc_packages, version = &amp;quot;3.9&amp;quot;)
+devtools::install_github(&amp;quot;adw96/breakaway&amp;quot;)
+devtools::install_github(repo = &amp;quot;UVic-omics/selbal&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;loading-required-packages&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Loading required packages&lt;/h1&gt;
+&lt;p&gt;Let’s load the required packages. This is not the most elegant way to do this, but it allows you to see each package that is loaded and the version number.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse); packageVersion(&amp;quot;tidyverse&amp;quot;)                 &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.2.1&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(phyloseq); packageVersion(&amp;quot;phyloseq&amp;quot;)                    &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.28.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(DESeq2); packageVersion(&amp;quot;DESeq2&amp;quot;)                        &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.24.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(microbiome); packageVersion(&amp;quot;microbiome&amp;quot;)               &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.6.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(vegan); packageVersion(&amp;quot;vegan&amp;quot;)                          &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;2.5.5&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(picante); packageVersion(&amp;quot;picante&amp;quot;)                       &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.8&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(ALDEx2); packageVersion(&amp;quot;ALDEx2&amp;quot;)                        &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.16.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(metagenomeSeq); packageVersion(&amp;quot;metagenomeSeq&amp;quot;)          &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.26.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(HMP); packageVersion(&amp;quot;HMP&amp;quot;)                              &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.6&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(dendextend); packageVersion(&amp;quot;dendextend&amp;quot;)                &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;1.12.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(selbal); packageVersion(&amp;quot;selbal&amp;quot;)                          &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;0.1.0&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(rms); packageVersion(&amp;quot;rms&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;5.1.3.1&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(breakaway); packageVersion(&amp;quot;breakaway&amp;quot;)                  &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;#39;4.6.8&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;reading-in-the-giloteaux-data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Reading in the Giloteaux data&lt;/h1&gt;
+&lt;p&gt;The data from the &lt;strong&gt;Giloteaux et. al. 2016 paper&lt;/strong&gt; has been saved as a phyloseq object. We will use the readRDS() function to read it into R. We will also examine the distribution of read counts (per sample library size/read depth/total reads) and remove samples with &amp;lt; 5k total reads. We will then create a new metadata field “Status” that provides more “descriptive” values for our primary variable of interest; whether or not the sample was from a patient with chronic fatigue syndrome or a healthy control.&lt;/p&gt;
+&lt;p&gt;This should all be familiar to those of you who worked through the &lt;a href=&#34;https://github.com/Nick243/Introduction-to-Metagenomics-Summer-Workshop-2019&#34;&gt;Introduction to Phyloseq&lt;/a&gt; session. However, something that will be new is that now we are using pipes from the &lt;a href=&#34;https://magrittr.tidyverse.org/&#34;&gt;magrittr package&lt;/a&gt; and &lt;a href=&#34;https://www.tidyverse.org/&#34;&gt;tidyverse&lt;/a&gt; verbs to streamline some of the data manipulation steps. &lt;em&gt;For those of you have not worked with the tidyverse set of packages and functions you are missing out!&lt;/em&gt; They will change they way you work in R. &lt;a href=&#34;https://r4ds.had.co.nz/&#34;&gt;R for Data Science&lt;/a&gt; is an excellent source to learn more about the tidyverse packages and philosophy for data science.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Additional quality controls checks and data pre-processing specific to the goals of your project should be conducted at this point (but is outside of the scope of the current session).&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Read in ps object
+(ps &amp;lt;- readRDS(&amp;quot;C:/Users/olljt2/Desktop/academic_web_page/static/data/ps_giloteaux_2016.rds&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 138 taxa and 87 samples ]
+## sample_data() Sample Data:       [ 87 samples by 22 sample variables ]
+## tax_table()   Taxonomy Table:    [ 138 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 138 tips and 137 internal nodes ]
+## refseq()      DNAStringSet:      [ 138 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Sort samples on total read count, remove &amp;lt;5k reads, remove any OTUs seen in only those samples
+sort(phyloseq::sample_sums(ps)) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ERR1331827 ERR1331852 ERR1331856 ERR1331869 ERR1331833 ERR1331797 
+##       2707       3031       3117       5083       5245       5307 
+## ERR1331786 ERR1331818 ERR1331792 ERR1331803 ERR1331793 ERR1331819 
+##       5696       5733       6463       6512       6622       6900 
+## ERR1331858 ERR1331807 ERR1331815 ERR1331821 ERR1331843 ERR1331795 
+##       6913       7121       7179       7272       7284       7314 
+## ERR1331846 ERR1331811 ERR1331845 ERR1331842 ERR1331838 ERR1331855 
+##       7569       7665       7815       7911       8102       8115 
+## ERR1331824 ERR1331832 ERR1331804 ERR1331868 ERR1331831 ERR1331859 
+##       8148       8186       8236       8612       8840       9016 
+## ERR1331790 ERR1331789 ERR1331837 ERR1331857 ERR1331801 ERR1331841 
+##       9085       9184       9731       9966      11173      11442 
+## ERR1331861 ERR1331820 ERR1331854 ERR1331863 ERR1331806 ERR1331787 
+##      11826      12940      13029      13094      13095      13690 
+## ERR1331853 ERR1331851 ERR1331836 ERR1331835 ERR1331802 ERR1331799 
+##      14113      14365      14488      14753      14799      14833 
+## ERR1331847 ERR1331834 ERR1331817 ERR1331809 ERR1331828 ERR1331813 
+##      15290      15367      15460      16162      16494      16749 
+## ERR1331798 ERR1331816 ERR1331830 ERR1331785 ERR1331823 ERR1331865 
+##      16947      17015      17457      17557      18506      19013 
+## ERR1331848 ERR1331800 ERR1331867 ERR1331870 ERR1331810 ERR1331825 
+##      19257      19443      19732      19783      19909      20069 
+## ERR1331866 ERR1331871 ERR1331849 ERR1331860 ERR1331808 ERR1331872 
+##      20760      20862      21540      21553      21713      22339 
+## ERR1331812 ERR1331850 ERR1331791 ERR1331788 ERR1331796 ERR1331840 
+##      22518      22639      23246      23751      23792      24752 
+## ERR1331826 ERR1331822 ERR1331862 ERR1331864 ERR1331829 ERR1331844 
+##      28186      28556      31064      44533      51918      57214 
+## ERR1331805 ERR1331839 ERR1331794 
+##      59355      61206      65941&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps &amp;lt;- phyloseq::subset_samples(ps, phyloseq::sample_sums(ps) &amp;gt; 5000)) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 138 taxa and 84 samples ]
+## sample_data() Sample Data:       [ 84 samples by 22 sample variables ]
+## tax_table()   Taxonomy Table:    [ 138 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 138 tips and 137 internal nodes ]
+## refseq()      DNAStringSet:      [ 138 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ps &amp;lt;- phyloseq::prune_taxa(phyloseq::taxa_sums(ps) &amp;gt; 0, ps)) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 138 taxa and 84 samples ]
+## sample_data() Sample Data:       [ 84 samples by 22 sample variables ]
+## tax_table()   Taxonomy Table:    [ 138 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 138 tips and 137 internal nodes ]
+## refseq()      DNAStringSet:      [ 138 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Assign new sample metadata field
+phyloseq::sample_data(ps)$Status &amp;lt;- ifelse(phyloseq::sample_data(ps)$Subject == &amp;quot;Patient&amp;quot;, &amp;quot;Chronic Fatigue&amp;quot;, &amp;quot;Control&amp;quot;)
+phyloseq::sample_data(ps)$Status &amp;lt;- factor(phyloseq::sample_data(ps)$Status, levels = c(&amp;quot;Control&amp;quot;, &amp;quot;Chronic Fatigue&amp;quot;))
+ps %&amp;gt;% 
+  sample_data %&amp;gt;%
+  dplyr::count(Status)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 2 x 2
+##   Status              n
+##   &amp;lt;fct&amp;gt;           &amp;lt;int&amp;gt;
+## 1 Control            37
+## 2 Chronic Fatigue    47&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can see that we have a phyloseq object consisting of 138 taxa on 84 samples, 22 sample metadata fields, 7 taxonomic ranks and that a phylogenetic tree and the reference sequences have been included. We also see that there are data on n=37 controls and n=47 patients with chronic fatigue.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;visualizing-relative-abundance&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Visualizing relative abundance&lt;/h1&gt;
+&lt;p&gt;Often an early step in many microbiome projects to visualize the relative abundance of organisms at specific taxonomic ranks. Stacked bar plots and faceted box plots are two ways of doing this. I recommend that if using bar plots to include each sample as a separate observation (and not to aggregate by groups). This is because the sample-to-sample variability can be high, even within groups, which may be just or more important to observe than between-group differences…which can be obscured with aggregation.&lt;/p&gt;
+&lt;p&gt;The ability to discriminate between more than say a dozen colors in a single plot is also a limitation of the stacked bar plot (faceted box plots do not suffer this limitation). Thus, this is one analysis I often run in QIIME2 using the &lt;a href=&#34;https://docs.qiime2.org/2019.4/tutorials/moving-pictures/&#34;&gt;taxa barplot command&lt;/a&gt;, as it allows for beautiful &lt;a href=&#34;https://view.qiime2.org/visualization/?type=html&amp;amp;src=https%3A%2F%2Fdocs.qiime2.org%2F2019.4%2Fdata%2Ftutorials%2Fmoving-pictures%2Ftaxa-bar-plots.qzv&#34;&gt;interactive viewing&lt;/a&gt;. This could also be done in R using a &lt;a href=&#34;https://shiny.rstudio.com/&#34;&gt;shiny app&lt;/a&gt;. I just haven’t implemented, or seen others implement, this functionality yet in R (I imagine someone has so please let me know if/when you do).&lt;/p&gt;
+&lt;p&gt;Here we will agglomerate the reads to the phylum-level using phyloseq and plot the relative abundance by Status.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Get count of phyla
+table(phyloseq::tax_table(ps)[, &amp;quot;Phylum&amp;quot;])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Actinobacteria   Bacteroidetes   Cyanobacteria   Euryarchaeota 
+##               7              11               2               1 
+##      Firmicutes    Fusobacteria  Proteobacteria     Tenericutes 
+##             105               1               7               2 
+## Verrucomicrobia 
+##               1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Convert to relative abundance
+ps_rel_abund = phyloseq::transform_sample_counts(ps, function(x){x / sum(x)})
+phyloseq::otu_table(ps)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## OTU Table:          [5 taxa and 5 samples]
+##                      taxa are rows
+##      ERR1331793 ERR1331872 ERR1331819 ERR1331794 ERR1331851
+## OTU1          2        581        347        916      10498
+## OTU2        371         46          0        233        301
+## OTU3       1189         81        637        199          0
+## OTU4          0        172        246          0        372
+## OTU5        308         44        143        155        221&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;phyloseq::otu_table(ps_rel_abund)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## OTU Table:          [5 taxa and 5 samples]
+##                      taxa are rows
+##        ERR1331793  ERR1331872 ERR1331819  ERR1331794 ERR1331851
+## OTU1 0.0003020236 0.026008326 0.05028986 0.013891206 0.73080404
+## OTU2 0.0560253700 0.002059179 0.00000000 0.003533462 0.02095371
+## OTU3 0.1795530051 0.003625946 0.09231884 0.003017849 0.00000000
+## OTU4 0.0000000000 0.007699539 0.03565217 0.000000000 0.02589628
+## OTU5 0.0465116279 0.001969649 0.02072464 0.002350586 0.01538462&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Plot
+phyloseq::plot_bar(ps_rel_abund, fill = &amp;quot;Phylum&amp;quot;) +
+  geom_bar(aes(color = Phylum, fill = Phylum), stat = &amp;quot;identity&amp;quot;, position = &amp;quot;stack&amp;quot;) +
+  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;Relative Abundance\n&amp;quot;) +
+  facet_wrap(~ Status, scales = &amp;quot;free&amp;quot;) +
+  theme(panel.background = element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/bar%20plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;There are a total of nine phyla and their relative abundance looks to be quite simialr between groups. You could sort the taxa on abundance to improve the vizualization. I’ll let you give that a shot on your own. Let’s generate box plots according to group and facet them by phylum using the raw counts. We will use the phyloseq::melt function to help.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Agglomerate to phylum-level and rename
+ps_phylum &amp;lt;- phyloseq::tax_glom(ps, &amp;quot;Phylum&amp;quot;)
+phyloseq::taxa_names(ps_phylum) &amp;lt;- phyloseq::tax_table(ps_phylum)[, &amp;quot;Phylum&amp;quot;]
+phyloseq::otu_table(ps_phylum)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## OTU Table:          [5 taxa and 5 samples]
+##                      taxa are rows
+##                ERR1331793 ERR1331872 ERR1331819 ERR1331794 ERR1331851
+## Bacteroidetes        1903        878       1837       1969      11776
+## Proteobacteria        119       3315        468      62358        319
+## Firmicutes           4319      14429       3548       1609       2207
+## Actinobacteria         30        976         17          0         58
+## Cyanobacteria         246          0          0          0          0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Melt and plot
+phyloseq::psmelt(ps_phylum) %&amp;gt;%
+ggplot(data = ., aes(x = Status, y = Abundance)) +
+  geom_boxplot(outlier.shape  = NA) +
+  geom_jitter(aes(color = OTU), height = 0, width = .2) +
+  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;Abundance\n&amp;quot;) +
+  facet_wrap(~ OTU, scales = &amp;quot;free&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/box%20plot-1.png&#34; width=&#34;1152&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;As we saw before, many samples have a high number of Firmicutes, followed by Bacteroidetes, and Actinobacteria. Most samples have low read counts for other phyla with some outlying samples. There does not appear to be much difference in the major phyla between groups. Check out Ben Callahan’s &lt;a href=&#34;https://f1000research.com/articles/5-1492&#34;&gt;F1000 paper&lt;/a&gt; for additional examples on visualizing sequence variant prevalence/abundance that may be helpful for specific analyses.&lt;/p&gt;
+&lt;p&gt;One way to formally test for a difference in the phylum-level abundance is to conduct a multivariate test for differences in the overall composition between groups of samples. This type of test can be implemented using the &lt;a href=&#34;https://cran.r-project.org/web/packages/HMP/index.html&#34;&gt;HMP package&lt;/a&gt; (Xdc.sevsample function) described in the paper &lt;a href=&#34;https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0052078&#34;&gt;Hypothesis Testing and Power Calculations for Taxonomic-Based Human Microbiome Data&lt;/a&gt; by La Rosa et. al.&lt;/p&gt;
+&lt;p&gt;Basically, a &lt;a href=&#34;https://en.wikipedia.org/wiki/Dirichlet-multinomial_distribution&#34;&gt;Dirichlet-Multinomial distribution&lt;/a&gt; is assumed for the data and null hypothesis testing is conducted by testing for a difference in the location (mean distribution of each taxa) across groups accounting for the overdispersion in the count data. The authors describe this test as analogous to a two sample t-test, but instead we are evaluating whether taxa frequencies observed in both groups of metagenomic samples are equal (null hypothesis). Here we are performing the test on bacterial phyla, but it could be performed &lt;strong&gt;at any taxonomic level&lt;/strong&gt; including OTUs. The authors recommend that rare taxa be pooled into a single group to improve testing.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Subset groups
+controls &amp;lt;- phyloseq::subset_samples(ps_phylum, Status == &amp;quot;Control&amp;quot;)
+cf &amp;lt;- phyloseq::subset_samples(ps_phylum, Status == &amp;quot;Chronic Fatigue&amp;quot;)
+#Output OTU tables
+control_otu &amp;lt;- data.frame(phyloseq::otu_table(controls))
+cf_otu &amp;lt;- data.frame(phyloseq::otu_table(cf))
+#Group rare phyla
+control_otu &amp;lt;- control_otu %&amp;gt;%
+  t(.) %&amp;gt;%
+  as.data.frame(.) %&amp;gt;%
+  mutate(Other = Cyanobacteria + Euryarchaeota + Tenericutes + Verrucomicrobia + Fusobacteria) %&amp;gt;%
+  dplyr::select(-Cyanobacteria, -Euryarchaeota, -Tenericutes, -Verrucomicrobia, -Fusobacteria)
+cf_otu &amp;lt;- cf_otu %&amp;gt;%
+  t(.) %&amp;gt;%
+  as.data.frame(.) %&amp;gt;%
+  mutate(Other = Cyanobacteria + Euryarchaeota + Tenericutes + Verrucomicrobia + Fusobacteria) %&amp;gt;%
+  dplyr::select(-Cyanobacteria, -Euryarchaeota, -Tenericutes, -Verrucomicrobia, -Fusobacteria)
+#HMP test
+group_data &amp;lt;- list(control_otu, cf_otu)
+(xdc &amp;lt;- HMP::Xdc.sevsample(group_data))           &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## $`Xdc statistics`
+## [1] 0.2769004
+## 
+## $`p value`
+## [1] 0.9980551&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;1 - pchisq(.2769004, 5)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.9980551&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The HMP test fails to reject the null hypothesis of no difference in the distribution of phyla between groups (in line with our expectations). The xdc test follows a Chi-square distribution with degrees of freedom equal to (J-1)*K, where J is the number of groups and K is the number of taxa. The last calculation just shows how the p-value is obtained. The test can be expanded to more than two groups and to test for differences in rank abundance distributions (RAD). These are topics I encourage you to explore on your own.
+The microbiome package also has some nice functions for visualizing &lt;a href=&#34;http://microbiome.github.io/microbiome/Composition.html&#34;&gt;community composition&lt;/a&gt; you should look into.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;hierarchical-clustering&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Hierarchical clustering&lt;/h1&gt;
+&lt;p&gt;Another early step in many microbiome projects to examine how samples cluster on some measure of taxonomic (dis)similarity. There are &lt;strong&gt;MANY&lt;/strong&gt; ways to do perform such clustering. Here I present just one approach that I assume many of you are familiar with. We will perform hierarchal clustering of samples based on their Bray-Curtis dissimilarity. Here is a link to how it is &lt;a href=&#34;https://en.wikipedia.org/wiki/Bray%E2%80%93Curtis_dissimilarity&#34;&gt;calculated&lt;/a&gt;. We will discuss this in more detail during the lecture, but for now it should suffice to know that the &lt;strong&gt;as two samples share fewer taxa, the number increases.&lt;/strong&gt; The Bray-Curtis dissimilarity is zero for samples that have the exact same composition and one for those sharing no taxa. It is also worth remembering that this is a measure of dissimilarity (it is not a true distance measure).&lt;/p&gt;
+&lt;p&gt;We will use the popular &lt;a href=&#34;https://www.rdocumentation.org/packages/vegan/versions/2.4-2&#34;&gt;vegan package&lt;/a&gt; for community ecology to compute the Bray-Curtis dissimilarity for all samples. Then we will apply Ward’s clustering and color code the sample names to assess the extent to which the samples from the control and chronic fatigue participants cluster. At a high-level, Ward’s clustering finds the pair of clusters at each iteration that minimalizes the increase in total variance.&lt;/p&gt;
+&lt;p&gt;Let’s see how this is done in R.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Extract OTU table and compute BC
+ps_rel_otu &amp;lt;- data.frame(phyloseq::otu_table(ps_rel_abund))
+ps_rel_otu &amp;lt;- t(ps_rel_otu)
+bc_dist &amp;lt;- vegan::vegdist(ps_rel_otu, method = &amp;quot;bray&amp;quot;)
+as.matrix(bc_dist)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##            ERR1331793 ERR1331872 ERR1331819 ERR1331794 ERR1331851
+## ERR1331793  0.0000000  0.8801040  0.5975550  0.9767218  0.8684629
+## ERR1331872  0.8801040  0.0000000  0.7590766  0.9596181  0.9206484
+## ERR1331819  0.5975550  0.7590766  0.0000000  0.9556656  0.7810736
+## ERR1331794  0.9767218  0.9596181  0.9556656  0.0000000  0.9693291
+## ERR1331851  0.8684629  0.9206484  0.7810736  0.9693291  0.0000000&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Save as dendrogram
+ward &amp;lt;- as.dendrogram(hclust(bc_dist, method = &amp;quot;ward.D2&amp;quot;))
+#Provide color codes
+meta &amp;lt;- data.frame(phyloseq::sample_data(ps_rel_abund))
+colorCode &amp;lt;- c(Control = &amp;quot;red&amp;quot;, `Chronic Fatigue` = &amp;quot;blue&amp;quot;)
+labels_colors(ward) &amp;lt;- colorCode[meta$Status][order.dendrogram(ward)]
+#Plot
+plot(ward)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/wards-1.png&#34; width=&#34;1536&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can see that the Bray-Curtis dissimilarity for these selected samples range from around 0.6 to close to 1. Thus, the composition of some samples are quite different from one another. We also see some clustering according to Status near the tips, but no clear “higher-level” clustering. We will try to exploit this information later to see if we can predict the label of each sample with only information on the microbial relative abundances.&lt;/p&gt;
+&lt;p&gt;Heatmaps are another good way to visualize these types of associations and can be implemented using &lt;a href=&#34;https://joey711.github.io/phyloseq/plot_heatmap-examples.html&#34;&gt;phyloseq&lt;/a&gt;. Give it a try on your own!&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;alpha-diversity&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Alpha-diversity&lt;/h1&gt;
+&lt;p&gt;Robert Edgar provides an excellent definition of alpha-diversity on his &lt;a href=&#34;https://www.drive5.com/usearch/manual/alpha_diversity.html&#34;&gt;website&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Alpha-diversity is the diversity in a single ecosystem or sample. The simplest measure is richness, the number of species (or OTUs) observed in the sample. Other metrics consider the abundances (frequencies) of the OTUs, for example to give lower weight to lower-abundance OTUs.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Basically, it is the within-sample diversity and includes how many organisms are observed (i.e. observed OTUs) and how evenly they are distributed. Many researchers are interested in estimating alpha-diversity since differences between groups have been associated with several health related outcomes. &lt;strong&gt;However the issue of how to best estimate these quantities using data derived from next-generation sequencing (NGS) is controversial.&lt;/strong&gt; This is due to two main reasons:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;The observed richness in a sample/site is typically underestimated due to inexhaustive sampling. Thus, valid estimators of diversity require extrapolating from the available observations to provide estimates of the unobserved taxa (and also account for the sampling variability).&lt;/li&gt;
+&lt;li&gt;Extrapolation estimators require an accurate count of the rare taxa (including singletons) in each sample…which for NGS-based metagenomics studies we typically do not have…since singletons generally cannot be differentiated from sequencing errors using the current best informatics workflows. The extent to which we cannot accurately detect low abundance taxa limits the utility of diversity estimators reliant upon such counts.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;em&gt;So we are kind of in a catch-22 regarding the best way forward given current technologies.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;It has been argued; however, that diversity metrics can nevertheless be compared between samples because the errors and biases &lt;strong&gt;are mostly systematic&lt;/strong&gt; (i.e. occur with similar rates in all samples). See Dr. Edgar’s discussion of the topic &lt;a href=&#34;https://www.drive5.com/usearch/manual/diversity_metrics_compare_groups.html&#34;&gt;here&lt;/a&gt; for more detail. This is what is typically done in most published studies to date. A major underlying assumption here is that abundance structures are the same for the two groups being compared. This is perhaps a reasonable assumption when comparing similar environments, but it is hard to know without exhaustive sampling. See figure 1 &lt;a href=&#34;https://www.biorxiv.org/content/biorxiv/early/2017/12/11/231878.full.pdf&#34;&gt;here&lt;/a&gt; and the related discussion by Amy Willis for a more detailed understanding of how the abundance structure can lead you to incorrect conclusions (quite disconcerting).&lt;/p&gt;
+&lt;p&gt;Rarefaction (subsampling reads from each sample without replacement to a constant depth) is often performed before estimating alpha-diversity; although, it is unclear to me if/when this helps since &lt;em&gt;environments can be identical with respect to one alpha diversity metric, but the different abundance structures will induce different biases when rarified&lt;/em&gt; (italicized text taken from Amy’s paper linked to above).&lt;/p&gt;
+&lt;p&gt;Dr. Willis has examined this issue in depth and developed &lt;a href=&#34;https://github.com/adw96/breakaway&#34;&gt;breakaway&lt;/a&gt; and &lt;a href=&#34;https://github.com/adw96/DivNet&#34;&gt;DivNet&lt;/a&gt; to specifically address the shortcoming of current approaches. I highly recommend you check out her &lt;a href=&#34;https://github.com/adw96&#34;&gt;GitHub site&lt;/a&gt;. In a recent &lt;a href=&#34;https://www.biorxiv.org/content/biorxiv/early/2017/12/11/231878.full.pdf&#34;&gt;paper&lt;/a&gt; she argues:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In order to draw meaningful conclusions about the entire microbial community, it is necessary to adjust for inexhaustive sampling using statistically-motivated parameter estimates for alpha diversity. In order to draw meaningful conclusions regarding comparisons of microbial communities, it is necessary to use measurement error models to adjust for the uncertainty in the estimation of alpha diversity.
+She also states that breakaway is not &lt;em&gt;overly sensitive&lt;/em&gt; to singleton counts.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The links below provide a brief introduction to the topic. I look forward to Amy’s updated tutorial and thoughts on when microbial diversity estimation is, and isn’t, possible as mentioned in the last link &lt;em&gt;(I suspect it will result in some updating of these materials)&lt;/em&gt;.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.drive5.com/usearch/manual/alpha_diversity.html&#34; class=&#34;uri&#34;&gt;https://www.drive5.com/usearch/manual/alpha_diversity.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.biorxiv.org/content/biorxiv/early/2017/12/11/231878.full.pdf&#34; class=&#34;uri&#34;&gt;https://www.biorxiv.org/content/biorxiv/early/2017/12/11/231878.full.pdf&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/benjjneb/dada2/issues/103&#34; class=&#34;uri&#34;&gt;https://github.com/benjjneb/dada2/issues/103&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/benjjneb/dada2/issues/317&#34; class=&#34;uri&#34;&gt;https://github.com/benjjneb/dada2/issues/317&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Below we will estimate and test for differences according to chronic fatigue status using the plug-in estimates for observed richness, Shannon diversity, and phylogenetic diversity on the subsampled data (since this is common practice). I have also provided some code to estimate richness using breakaway that you can examine on your own. I plan to update this section with some data that is more appropriate for breakaway. So check back soon.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(data = data.frame(&amp;quot;total_reads&amp;quot; =  phyloseq::sample_sums(ps),
+                         &amp;quot;observed&amp;quot; = phyloseq::estimate_richness(ps, measures = &amp;quot;Observed&amp;quot;)[, 1]),
+       aes(x = total_reads, y = observed)) +
+  geom_point() +
+  geom_smooth(method=&amp;quot;lm&amp;quot;, se = FALSE) +
+  labs(x = &amp;quot;\nTotal Reads&amp;quot;, y = &amp;quot;Observed Richness\n&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/read%20plot-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;We see that the observed OTUs are correlated with the total read count (as expected). Now let’s subsample, plot, and test for group differences.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Subsample reads
+(ps_rare &amp;lt;- phyloseq::rarefy_even_depth(ps, rngseed = 123, replace = FALSE))             &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## `set.seed(123)` was used to initialize repeatable random subsampling.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Please record this for your records so others can reproduce.&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Try `set.seed(123); .Random.seed` for the full vector&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ...&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 138 taxa and 84 samples ]
+## sample_data() Sample Data:       [ 84 samples by 23 sample variables ]
+## tax_table()   Taxonomy Table:    [ 138 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 138 tips and 137 internal nodes ]
+## refseq()      DNAStringSet:      [ 138 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(phyloseq::sample_sums(ps_rare))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ERR1331793 ERR1331872 ERR1331819 ERR1331794 ERR1331851 ERR1331834 
+##       5083       5083       5083       5083       5083       5083&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Generate a data.frame with adiv measures
+adiv &amp;lt;- data.frame(
+  &amp;quot;Observed&amp;quot; = phyloseq::estimate_richness(ps_rare, measures = &amp;quot;Observed&amp;quot;),
+  &amp;quot;Shannon&amp;quot; = phyloseq::estimate_richness(ps_rare, measures = &amp;quot;Shannon&amp;quot;),
+  &amp;quot;PD&amp;quot; = picante::pd(samp = data.frame(t(data.frame(phyloseq::otu_table(ps_rare)))), tree = phyloseq::phy_tree(ps_rare))[, 1],
+  &amp;quot;Status&amp;quot; = phyloseq::sample_data(ps_rare)$Status)
+head(adiv)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##            Observed   Shannon        PD          Status
+## ERR1331793       53 2.7462377 20.597980 Chronic Fatigue
+## ERR1331872       52 2.7527053 21.289719         Control
+## ERR1331819       70 3.2378006 21.671340         Control
+## ERR1331794       27 0.3761523  8.275154 Chronic Fatigue
+## ERR1331851       45 1.3387308 14.783592 Chronic Fatigue
+## ERR1331834       54 2.8883445 20.988640         Control&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Plot adiv measures
+adiv %&amp;gt;%
+  gather(key = metric, value = value, c(&amp;quot;Observed&amp;quot;, &amp;quot;Shannon&amp;quot;, &amp;quot;PD&amp;quot;)) %&amp;gt;%
+  mutate(metric = factor(metric, levels = c(&amp;quot;Observed&amp;quot;, &amp;quot;Shannon&amp;quot;, &amp;quot;PD&amp;quot;))) %&amp;gt;%
+  ggplot(aes(x = Status, y = value)) +
+  geom_boxplot(outlier.color = NA) +
+  geom_jitter(aes(color = Status), height = 0, width = .2) +
+  labs(x = &amp;quot;&amp;quot;, y = &amp;quot;&amp;quot;) +
+  facet_wrap(~ metric, scales = &amp;quot;free&amp;quot;) +
+  theme(legend.position=&amp;quot;none&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/alpha-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Summarize
+adiv %&amp;gt;%
+  group_by(Status) %&amp;gt;%
+  dplyr::summarise(median_observed = median(Observed),
+            median_shannon = median(Shannon),
+            median_pd = median(PD))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 2 x 4
+##   Status          median_observed median_shannon median_pd
+##   &amp;lt;fct&amp;gt;                     &amp;lt;dbl&amp;gt;          &amp;lt;dbl&amp;gt;     &amp;lt;dbl&amp;gt;
+## 1 Control                      49           2.40      18.1
+## 2 Chronic Fatigue              46           2.30      17.0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Wilcoxon test of location
+wilcox.test(Observed ~ Status, data = adiv, exact = FALSE, conf.int = TRUE)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  Observed by Status
+## W = 1007.5, p-value = 0.2146
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -1.000059  5.000002
+## sample estimates:
+## difference in location 
+##               2.000087&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox.test(Shannon ~ Status, data = adiv, conf.int = TRUE)              &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum test
+## 
+## data:  Shannon by Status
+## W = 1037, p-value = 0.1329
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -0.04346366  0.39218192
+## sample estimates:
+## difference in location 
+##              0.1421467&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox.test(PD ~ Status, data = adiv, conf.int = TRUE)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum test
+## 
+## data:  PD by Status
+## W = 995, p-value = 0.2616
+## alternative hypothesis: true location shift is not equal to 0
+## 95 percent confidence interval:
+##  -0.7452342  2.1356893
+## sample estimates:
+## difference in location 
+##              0.6854015&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we see a modestly lower median alpha-diversity in samples from participants with chronic fatigue when compared to healthy controls. However, the variation in alpha-diversity between groups is highly overlapping and we fail to reject the null hypothesis of no difference in location between groups.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Below is the code to estimate richness using breakaway. You will see some warnings. I plan to update this section with some additional data so check back soon.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Obtain breakaway estimates
+ba_adiv &amp;lt;- breakaway::breakaway(ps)
+ba_adiv[1]
+#Plot estimates
+plot(ba_adiv, ps, color = &amp;quot;Status&amp;quot;)     
+#Examine models
+summary(ba_adiv) %&amp;gt;%
+  add_column(&amp;quot;SampleNames&amp;quot; = ps %&amp;gt;% otu_table %&amp;gt;% sample_names)  
+#Test for group differnce
+bt &amp;lt;- breakaway::betta(summary(ba_adiv)$estimate,
+                       summary(ba_adiv)$error,
+                       make_design_matrix(ps, &amp;quot;Status&amp;quot;))
+bt$table                                                        &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;beta-diversity&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Beta-diversity&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;Beta-diversity provides a measure of similarity, or dissimilarity, of one microbial composition to another.&lt;/strong&gt; Beta-diversity is typically calculated on the OTU/ASV/species composition tables directly (after normalization), but can be calculated using abundances at higher taxonomic levels. One common estimator of microbial beta-diversity is the pairwise &lt;a href=&#34;https://en.wikipedia.org/wiki/Euclidean_distance&#34;&gt;Euclidean distance&lt;/a&gt; between samples. However, many ecologically informative measures are also commonly used and include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Bray-Curtis similarity&lt;/li&gt;
+&lt;li&gt;Jaccard similarity&lt;/li&gt;
+&lt;li&gt;Yue &amp;amp; Clayton theta similarity&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://aem.asm.org/content/71/12/8228&#34;&gt;UniFrac distance&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AND MANY MORE&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Pat Schloss provides a listing and links to a large number of alpha- and beta-diversity estimators on his &lt;a href=&#34;https://mothur.org/wiki/Calculators&#34;&gt;mothur wiki page&lt;/a&gt;. He also offers &lt;a href=&#34;https://www.mothur.org/wiki/Workshops&#34;&gt;workshops&lt;/a&gt; on using mothur for processing amplicon sequence data and on using R for microbial ecologists a few times a year that I highly recommend.&lt;/p&gt;
+&lt;p&gt;This is probably a good time to touch on &lt;strong&gt;count normalization.&lt;/strong&gt; One of the challenges we face working with NGS-derived sequence data is that &lt;em&gt;the total number of reads for each sample is not directly tied to the starting quantity of DNA.&lt;/em&gt; You can think of the total reads (to a reasonable approximation) as getting assigned by a random sampling process where some samples just get doled out more reads. Thus, the &lt;strong&gt;total count does not carry any information on the absolute abundance of taxa.&lt;/strong&gt; As long as the count is sufficiently large, it is just a factor that we want to account for in our analysis and is not of particular interest other than differences across samples can be a source of bias. Paul McMurdie provides an excellent discussion of the various goals and some approaches for normalization in his chapter on &lt;a href=&#34;https://experiments.springernature.com/articles/10.1007/978-1-4939-8728-3_10&#34;&gt;Normalization of Microbiome Profiling Data&lt;/a&gt; in the first edition of &lt;a href=&#34;https://www.springer.com/us/book/9781493987269?gclid=Cj0KCQjw3uboBRDCARIsAO2XcYCprgmMyNEyKBS0QWmqNSUSfbZ8yiN29s1HjVYYGx3T7Z-Qmylv5x8aAoRLEALw_wcB&#34;&gt;Microbiome Analysis&lt;/a&gt;. &lt;a href=&#34;https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0237-y&#34;&gt;Weiss et. al.&lt;/a&gt; also provide a great introduction and examination of the impact of normalization approaches on beta-diversity ordinations and differential abundance testing.&lt;/p&gt;
+&lt;p&gt;Here we will consider two approaches for library size normalization. The first will employ a &lt;strong&gt;compositional data analysis approach&lt;/strong&gt; and involves working with log-ratios. The second will involve simply subsampling the data without replacement; however, this approach comes with &lt;a href=&#34;https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003531&#34;&gt;limiations&lt;/a&gt;. We will use it here as the authors of the UniFrac method have suggested that rarefying more clearly clusters samples according to biological origin than other normalization techniques do for ordination metrics based on presence or absence (i.e. unweighted UniFrac).&lt;/p&gt;
+&lt;p&gt;A detailed discussion of compositional data analysis (CoDA) is beyond the scope of this session. I plan to add a tutorial devoted to CoDA in the future so check back. &lt;strong&gt;At a high-level&lt;/strong&gt; compositional data (i.e. data that carry only relative information and are constrained by a unit sum) exist in a restricted subspace of the Euclidian geometry referred to as the D-1 simplex &lt;em&gt;(I know this doesn’t feel high-level)&lt;/em&gt;. Due to this constraint, these data fail to meet many of the assumptions of our favorite statistical methods developed for unconstrained random variables. Working with ratios of compositional elements lets us transform these data to the Euclidian space and apply our favorite methods (so we don’t need to work in the simplex). Working with their logarithms makes them easier to interpret. There are different types of log-ratio “transformations” including the additive log-ratio, centered log-ratio, and isometric log-ratio transforms. Below are some great resources for learning more about compositional data analysis:&lt;/p&gt;
+&lt;p&gt;*&lt;a href=&#34;https://academic.oup.com/bioinformatics/article/34/16/2870/4956011&#34;&gt;Understanding sequencing data as compositions: an outlook and review&lt;/a&gt; by Quinn et. al. in Bioinformatics (2018)&lt;/p&gt;
+&lt;p&gt;*&lt;a href=&#34;https://www.springer.com/us/book/9789811315336?gclid=Cj0KCQjw3uboBRDCARIsAO2XcYAphJ23am-AoIBh18HoW-WpAd8TwbQUEhc_DJV9gM-zWYtXe0-6l8saAkNHEALw_wcB&#34;&gt;Statistical Analysis of Microbiome Data with R - Ch. 10&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;*&lt;a href=&#34;https://www.springer.com/gp/book/9783319964201&#34;&gt;Applied Compositional Data Analysis&lt;/a&gt; by Filzmoser, Hron, and Templ (2018)&lt;/p&gt;
+&lt;p&gt;*&lt;a href=&#34;https://www.springer.com/gp/book/9783642368080&#34;&gt;Analyzing Compositional Data with R&lt;/a&gt; by Boogaart and Tolosana-Delgado (2013)&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Below we generate a beta-diversity ordination using the Aitchison distance. This is simply applying PCA to the &lt;a href=&#34;https://en.wikipedia.org/wiki/Compositional_data#Center_logratio_transform&#34;&gt;centered log-ratio&lt;/a&gt; (CLR) transformed counts. We will use the microbiome package to do this and assign a pseudocount of 1 to facilitate the transformation (since the log of zero is undefined). There are alternative/better approaches than using a pseudocount and we will examine one in the next section. First we perform the transformation.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#CLR transform
+(ps_clr &amp;lt;- microbiome::transform(ps, &amp;quot;clr&amp;quot;))          &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 138 taxa and 84 samples ]
+## sample_data() Sample Data:       [ 84 samples by 23 sample variables ]
+## tax_table()   Taxonomy Table:    [ 138 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 138 tips and 137 internal nodes ]
+## refseq()      DNAStringSet:      [ 138 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;phyloseq::otu_table(ps)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## OTU Table:          [5 taxa and 5 samples]
+##                      taxa are rows
+##      ERR1331793 ERR1331872 ERR1331819 ERR1331794 ERR1331851
+## OTU1          2        581        347        916      10498
+## OTU2        371         46          0        233        301
+## OTU3       1189         81        637        199          0
+## OTU4          0        172        246          0        372
+## OTU5        308         44        143        155        221&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;phyloseq::otu_table(ps_clr)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## OTU Table:          [5 taxa and 5 samples]
+##                      taxa are rows
+##      ERR1331793 ERR1331872 ERR1331819 ERR1331794 ERR1331851
+## OTU1   1.289544   5.812706   5.615063   6.230204   9.467837
+## OTU2   6.485240   3.280355  -3.079591   4.863001   5.916398
+## OTU3   7.649802   3.844401   6.222432   4.705673  -1.903003
+## OTU4  -2.317399   4.596219   5.271139  -1.178342   6.128105
+## OTU5   6.299168   3.236089   4.728822   4.456584   5.607596&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can see that the values are now no longer counts, but rather the dominance (or lack thereof) for each taxa relative to the geometric mean of all taxa on the logarithmic scale (any log base could be used and often log2 or log10 may aid in interpretation).&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Now we will conduct the PCA, examine the relative importance of each principal component, and generate the ordination. &lt;strong&gt;PCA is an unsupervised learning approach&lt;/strong&gt; that can help us see similarities between samples when there are a large number of features. Scatter plots are not much help here in high-dimensions since the number of possible plots is equal to p(p-1)&lt;sup&gt;2&lt;/sup&gt; where p = the number of features (quickly becomes intractable). So we need to find an approach that will let us map these data to a lower-dimensional space. This is what PCA does. It identifies latent variables referred to as principal components (PC) that capture as much of the information as possible…where information is the amount of variation in the data. We can then focus on those PCs that are most interesting (i.e. explain the most variation; give us the best lower-dimensional mapping). Given we can only visualize our samples in 2- or 3-dimenstional space, most microbiome studies only plot the data using either the first couple of PCs. A more though introduction to PCA can be found in the textbook &lt;a href=&#34;http://www-bcf.usc.edu/~gareth/ISL/&#34;&gt;An Introduction to Statistical Learning&lt;/a&gt; by James, Witten, Hastie, and Tibshirani (2013). Let’s give it a try!&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#PCA via phyloseq
+ord_clr &amp;lt;- phyloseq::ordinate(ps_clr, &amp;quot;RDA&amp;quot;)
+#Plot scree plot
+phyloseq::plot_scree(ord_clr) + 
+  geom_bar(stat=&amp;quot;identity&amp;quot;, fill = &amp;quot;blue&amp;quot;) +
+  labs(x = &amp;quot;\nAxis&amp;quot;, y = &amp;quot;Proportion of Variance\n&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/pca%20scree-1.png&#34; width=&#34;1152&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Examine eigenvalues and % prop. variance explained
+head(ord_clr$CA$eig)                                                  &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      PC1      PC2      PC3      PC4      PC5      PC6 
+## 75.69204 36.27003 33.16649 29.08833 25.52986 24.32215&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sapply(ord_clr$CA$eig[1:5], function(x) x / sum(ord_clr$CA$eig))     &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##        PC1        PC2        PC3        PC4        PC5 
+## 0.10744095 0.05148344 0.04707812 0.04128939 0.03623832&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;RDA without constraints is PCA…and we can generate the PCs using the phyloseq::ordinate function. A scree plot is then used to examine the proportion of total variation explained by each PC. Here we see that the first PC really stands out and then we have a gradual decline for the remaining components. You may hear people talk about looking for the “elbow” in the plot where the information plateaus to select the number of PCs to retain. Below we plot the first two components and scale the plot to reflect the relative amount of information explained by each axis as recommended by Nguyen and Holmes in their paper &lt;a href=&#34;https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006907&#34;&gt;Ten quick tips for effective dimensionality reduction&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Scale axes and plot ordination
+clr1 &amp;lt;- ord_clr$CA$eig[1] / sum(ord_clr$CA$eig)
+clr2 &amp;lt;- ord_clr$CA$eig[2] / sum(ord_clr$CA$eig)
+phyloseq::plot_ordination(ps, ord_clr, type=&amp;quot;samples&amp;quot;, color=&amp;quot;Status&amp;quot;) + 
+  geom_point(size = 2) +
+  coord_fixed(clr2 / clr1) +
+  stat_ellipse(aes(group = Status), linetype = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/plot%20pca-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We see some separation between the chronic fatigue and healthy controls samples suggesting some differences in the communities according to sample type. There is also a fair degree of overlap as is often seen in clinical research studies examining the same environment in two different patient populations. While PCA is an exploratory data visualization tool, we can test whether the samples cluster beyond that expected by sampling variability using &lt;a href=&#34;http://cc.oulu.fi/~jarioksa/softhelp/vegan/html/adonis.html&#34;&gt;permutational multivariate analysis of variance&lt;/a&gt; (PERMANOVA). It does this by partitioning the sums of squares for the within- and between-cluster components using the concept of centroids. Many permutations of the data (i.e. random shuffling) are used to generate the null distribution. The test from ADONIS can be confounded by differences in dispersion (or spread)…so we want to check this as well.
+&lt;br&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Generate distance matrix
+clr_dist_matrix &amp;lt;- phyloseq::distance(ps_clr, method = &amp;quot;euclidean&amp;quot;) 
+#ADONIS test
+vegan::adonis(clr_dist_matrix ~ phyloseq::sample_data(ps_clr)$Status)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Call:
+## vegan::adonis(formula = clr_dist_matrix ~ phyloseq::sample_data(ps_clr)$Status) 
+## 
+## Permutation: free
+## Number of permutations: 999
+## 
+## Terms added sequentially (first to last)
+## 
+##                                      Df SumsOfSqs MeanSqs F.Model      R2
+## phyloseq::sample_data(ps_clr)$Status  1      2240 2240.17  3.2666 0.03831
+## Residuals                            82     56233  685.77         0.96169
+## Total                                83     58473                 1.00000
+##                                      Pr(&amp;gt;F)    
+## phyloseq::sample_data(ps_clr)$Status  0.001 ***
+## Residuals                                      
+## Total                                          
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Dispersion test and plot
+dispr &amp;lt;- vegan::betadisper(clr_dist_matrix, phyloseq::sample_data(ps_clr)$Status)
+dispr&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Homogeneity of multivariate dispersions
+## 
+## Call: vegan::betadisper(d = clr_dist_matrix, group =
+## phyloseq::sample_data(ps_clr)$Status)
+## 
+## No. of Positive Eigenvalues: 83
+## No. of Negative Eigenvalues: 0
+## 
+## Average distance to median:
+##         Control Chronic Fatigue 
+##            25.1            26.2 
+## 
+## Eigenvalues for PCoA axes:
+## (Showing 8 of 83 eigenvalues)
+## PCoA1 PCoA2 PCoA3 PCoA4 PCoA5 PCoA6 PCoA7 PCoA8 
+##  6282  3010  2753  2414  2119  2019  1895  1693&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot(dispr, main = &amp;quot;Ordination Centroids and Dispersion Labeled: Aitchison Distance&amp;quot;, sub = &amp;quot;&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/adonis-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;boxplot(dispr, main = &amp;quot;&amp;quot;, xlab = &amp;quot;&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/adonis-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;permutest(dispr)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Permutation test for homogeneity of multivariate dispersions
+## Permutation: free
+## Number of permutations: 999
+## 
+## Response: Distances
+##           Df Sum Sq Mean Sq      F N.Perm Pr(&amp;gt;F)  
+## Groups     1  24.95 24.9463 3.0491    999  0.075 .
+## Residuals 82 670.89  8.1816                       
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We reject the null hypothesis of no difference in the centroid location according to Status. However, the proportion of variance explained is quite small. You might get slightly different numbers. This is because of the random process generating the permutations. There is a suggestion that the dispersion is greater in samples from patients with chronic fatigue syndrome. However, it does not exceed that expected by sampling variablilty at this sample size.
+As has been explained by others (Xia, Sun, and Chen; Ch 7.4), I want to mention that this type of testing is akin to &lt;strong&gt;attempting to “explain” the axes&lt;/strong&gt; using metadata fields. A more formal approach to hypotheses testing can be done using &lt;em&gt;redundancy analysis or canonical correspondence analysis&lt;/em&gt; that directly uses information on metadata fields when generating the ordinations and conducting testing. These approaches &lt;em&gt;directly&lt;/em&gt; test hypotheses about environmental variables. I will not demonstrate these approaches here, but they can be computed using some of these same commands with minor modifications.&lt;/p&gt;
+&lt;p&gt;Lastly, I want to show you how you can bring in information the form of a phylogenic tree into beta-diversity analysis. The &lt;strong&gt;UniFrac metric&lt;/strong&gt; incorporates phylogenic information by calculating the total branch lengths “unshared” between two samples divided by the total branch length. This approach often reveals interesting differences in the phylogenic relatedness between samples and sample types. Here we compute the weighted and unweighted UniFrac metrics using PCoA. PCoA can be thought of as PCA for non-Euclidian measures.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Generate distances
+ord_unifrac &amp;lt;- ordinate(ps_rare, method = &amp;quot;PCoA&amp;quot;, distance = &amp;quot;wunifrac&amp;quot;) 
+ord_unifrac_un &amp;lt;- ordinate(ps_rare, method = &amp;quot;PCoA&amp;quot;, distance = &amp;quot;unifrac&amp;quot;)   
+#Plot ordinations
+a &amp;lt;- plot_ordination(ps_rare, ord_unifrac, color = &amp;quot;Status&amp;quot;) + geom_point(size = 2)
+b &amp;lt;- plot_ordination(ps_rare, ord_unifrac_un, color = &amp;quot;Status&amp;quot;) + geom_point(size = 2)
+cowplot::plot_grid(a, b, nrow = 1, ncol = 2, scale = .9, labels = c(&amp;quot;Weighted&amp;quot;, &amp;quot;Unweighted&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/plot%20unifrac-1.png&#34; width=&#34;1536&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;There is a large amount of overlap between sample types for the weighted UniFrac distance (accounts for the relative abundance of each of the taxa within the communities). However, there is clustering on at least the first axis for the unweighted UniFrac distance that is not “explained” by Status. &lt;em&gt;Is there a metadata field in the data that reflects this separation?&lt;/em&gt; I’ll let you explore on your own.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;differential-abundance-testing&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Differential abundance testing&lt;/h1&gt;
+&lt;p&gt;The goal of differential abundance testing is to &lt;strong&gt;identify specific taxa associated with clinical metadata variables of interest.&lt;/strong&gt; This is a difficult task. It is also one of the more controversial areas in microbiome data analysis. Some of the reasons for this are described in a recent paper by James Morton et. al. in &lt;a href=&#34;https://www.nature.com/articles/s41467-019-10656-5&#34;&gt;Nature Communications&lt;/a&gt; (2019), but is related to concerns that normalization and testing approaches have generally failed to control false discovery rates &lt;a href=&#34;https://academic.oup.com/bib/article-abstract/20/1/210/4091293?redirectedFrom=fulltext&#34;&gt;(here is a good example)&lt;/a&gt; and this has contributed to the lack of reproducibility in microbiome studies. If you think about it for a moment, a couple of difficulties come to mind:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The goal of this type of analysis is to identify taxa that differ the most between conditions (or along a continuous gradient). Basically, we are identifying the most extreme results in the data. We would therefore &lt;strong&gt;expect some/many/most of these findings to have been “outlying” results simply due to chance sampling variation&lt;/strong&gt; and to perhaps &lt;a href=&#34;https://en.wikipedia.org/wiki/Regression_toward_the_mean&#34;&gt;regress back towards the mean/null value&lt;/a&gt; when tested in a new sample of patients.&lt;/li&gt;
+&lt;li&gt;The data are compositional and thus changes in one or more taxa can make it look like other/all taxa are changing. James Morton has an excellent example of this &lt;a href=&#34;https://docs.qiime2.org/2019.4/tutorials/gneiss/&#34;&gt;here&lt;/a&gt;. Methods that don’t properly account of the compositional nature of the data can have &lt;a href=&#34;https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8&#34;&gt;very high false discovery rates.&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Functionally redundant taxa may serve the same “niche” in different environments or populations causing different taxa to be identified as differentially abundant across samples (however the testing approach would not be what is misleading here).&lt;/li&gt;
+&lt;li&gt;The high correlation between many taxa may cause different, but highly correlated, features to be selected in different studies.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Professor Frank Harrell provides a great overview of this general concern in Chapter 20 of his &lt;a href=&#34;http://hbiostat.org/doc/bbr.pdf&#34;&gt;Biostatistics for Biomedical Research&lt;/a&gt; online text. For general thoughts on statistics and predictive modeling I highly recommend that you check out his &lt;a href=&#34;https://www.fharrell.com/#links&#34;&gt;blog&lt;/a&gt; and &lt;a href=&#34;http://biostat.mc.vanderbilt.edu/wiki/Main/RmS&#34;&gt;regression modeling strategies&lt;/a&gt; course notes.&lt;/p&gt;
+&lt;p&gt;Other fields have wrestled with similar problems and have introduced approaches such as the requirement of replicating results in multiple cohorts of patients prior to publication (or at least employing rigorous resampling approaches to gauge the reproducibility), analysis pre-specification, and focusing more on prediction than “naming names”. For compositional data including external information in the form of external spike-ins or estimates of total abundance (such as estimating total microbial load using qPCR), working with ratios, limiting the emphasis on testing, and understanding the limits of compositional data are likely reasonable ways forward here. However, &lt;strong&gt;none of these are a panacea.&lt;/strong&gt; Methodologists working in the area of microbiome data analysis are addressing some of these issues, but there is still much work to be done. Two excellent recent papers you should check out include James Morton’s paper above and this &lt;a href=&#34;https://www.biorxiv.org/content/10.1101/559831v1&#34;&gt;preprint&lt;/a&gt; in biorxiv by McLaren, Willis and Callahan (2019) explaining and modeling correctable bias in metagenomic sequence studies.&lt;/p&gt;
+&lt;p&gt;In this section, I will present a two approaches for estimating differential abundance. The first is simply applying the non-parametric Wilcoxon rank-sum test to each taxon. The second is a version of the Wilcoxon test developed for compositional NGS data. I chose these two approaches since they are commonly used in microbiome studies and I expect many of you will have some familiarity with the Wilcoxon test or (Gosset’s) t-test. However, all results should be interpreted in light of the concerns raised above. I also include the use of a CoDA transform for both since there does seem to be some growing support that log-ratio methodologies may better control the false positive rate.&lt;/p&gt;
+&lt;p&gt;Many researchers will apply the non-parametric Wilcoxon rank-sum test to each OTU/ASV/species after normalization. We will do this here. We will also use &lt;strong&gt;nested data frames&lt;/strong&gt; as advocated by Hadley Wickham to keep the data and test results together in a single data.frame. &lt;em&gt;At first, I found this approach a little strange.&lt;/em&gt; However, I have come to use it all the time. It is perhaps a bit overkill here, but a very helpful framework when you want to run many models and then save them together with the data and results (especially when they take a long time to run). Here is a &lt;a href=&#34;https://r4ds.had.co.nz/many-models.html&#34;&gt;link to a complete description of the nested frame approach&lt;/a&gt; in the R for Data Science book. We also use the map function from purr. This operates like a for loop, allowing us to iterate the test over each OTU, but with less coding. This is a big chunk of code. I will talk you through it.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Generate data.frame with OTUs and metadata
+ps_wilcox &amp;lt;- data.frame(t(data.frame(phyloseq::otu_table(ps_clr))))
+ps_wilcox$Status &amp;lt;- phyloseq::sample_data(ps_clr)$Status
+#Define functions to pass to map
+wilcox_model &amp;lt;- function(df){
+  wilcox.test(abund ~ Status, data = df)
+}
+wilcox_pval &amp;lt;- function(df){
+  wilcox.test(abund ~ Status, data = df)$p.value
+}
+#Create nested data frames by OTU and loop over each using map 
+wilcox_results &amp;lt;- ps_wilcox %&amp;gt;%
+  gather(key = OTU, value = abund, -Status) %&amp;gt;%
+  group_by(OTU) %&amp;gt;%
+  nest() %&amp;gt;%
+  mutate(wilcox_test = map(data, wilcox_model),
+         p_value = map(data, wilcox_pval))                       
+#Show results
+head(wilcox_results)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 4
+##   OTU   data              wilcox_test p_value  
+##   &amp;lt;chr&amp;gt; &amp;lt;list&amp;gt;            &amp;lt;list&amp;gt;      &amp;lt;list&amp;gt;   
+## 1 OTU1  &amp;lt;tibble [84 x 2]&amp;gt; &amp;lt;S3: htest&amp;gt; &amp;lt;dbl [1]&amp;gt;
+## 2 OTU2  &amp;lt;tibble [84 x 2]&amp;gt; &amp;lt;S3: htest&amp;gt; &amp;lt;dbl [1]&amp;gt;
+## 3 OTU3  &amp;lt;tibble [84 x 2]&amp;gt; &amp;lt;S3: htest&amp;gt; &amp;lt;dbl [1]&amp;gt;
+## 4 OTU4  &amp;lt;tibble [84 x 2]&amp;gt; &amp;lt;S3: htest&amp;gt; &amp;lt;dbl [1]&amp;gt;
+## 5 OTU5  &amp;lt;tibble [84 x 2]&amp;gt; &amp;lt;S3: htest&amp;gt; &amp;lt;dbl [1]&amp;gt;
+## 6 OTU6  &amp;lt;tibble [84 x 2]&amp;gt; &amp;lt;S3: htest&amp;gt; &amp;lt;dbl [1]&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(wilcox_results$data[[1]])&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 2
+##   Status          abund
+##   &amp;lt;fct&amp;gt;           &amp;lt;dbl&amp;gt;
+## 1 Chronic Fatigue  1.29
+## 2 Control          5.81
+## 3 Control          5.62
+## 4 Chronic Fatigue  6.23
+## 5 Chronic Fatigue  9.47
+## 6 Control          7.43&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox_results$wilcox_test[[1]]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  Wilcoxon rank sum test
+## 
+## data:  abund by Status
+## W = 1172, p-value = 0.006066
+## alternative hypothesis: true location shift is not equal to 0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;wilcox_results$p_value[[1]]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.006066387&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we can see that we have a tibble where:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;each OTU is a row&lt;/li&gt;
+&lt;li&gt;the data column contains a tibble for each OTU that contains the CLR abundance and Status fields (i.e. seperate data.frame for each OTU)&lt;/li&gt;
+&lt;li&gt;the wilcox_test column contains the results of each Wilcoxon test&lt;/li&gt;
+&lt;li&gt;the p_value column contains the extracted p-value for each test&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Now we will unnest the results, grab the OTU names and p-values, add the taxonomic labels, and calculate the FDR adjusted p-values.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Unnesting
+wilcox_results &amp;lt;- wilcox_results %&amp;gt;%
+  dplyr::select(OTU, p_value) %&amp;gt;%
+  unnest()
+head(wilcox_results)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 2
+##   OTU   p_value
+##   &amp;lt;chr&amp;gt;   &amp;lt;dbl&amp;gt;
+## 1 OTU1  0.00607
+## 2 OTU2  0.0686 
+## 3 OTU3  0.830  
+## 4 OTU4  0.0130 
+## 5 OTU5  0.419  
+## 6 OTU6  0.258&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Adding taxonomic labels
+taxa_info &amp;lt;- data.frame(tax_table(ps_clr))
+taxa_info &amp;lt;- taxa_info %&amp;gt;% rownames_to_column(var = &amp;quot;OTU&amp;quot;)
+#Computing FDR corrected p-values
+wilcox_results &amp;lt;- wilcox_results %&amp;gt;%
+  full_join(taxa_info) %&amp;gt;%
+  arrange(p_value) %&amp;gt;%
+  mutate(BH_FDR = p.adjust(p_value, &amp;quot;BH&amp;quot;)) %&amp;gt;%
+  filter(BH_FDR &amp;lt; 0.05) %&amp;gt;%
+  dplyr::select(OTU, p_value, BH_FDR, everything())&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Joining, by = &amp;quot;OTU&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Printing results
+print.data.frame(wilcox_results)  &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##      OTU      p_value      BH_FDR  Kingdom     Phylum           Class
+## 1  OTU48 1.893126e-05 0.002612514 Bacteria Firmicutes      Clostridia
+## 2  OTU38 4.168412e-05 0.002876205 Bacteria Firmicutes      Clostridia
+## 3  OTU44 2.750125e-04 0.012650574 Bacteria Firmicutes      Clostridia
+## 4  OTU61 1.217944e-03 0.038379997 Bacteria Firmicutes      Clostridia
+## 5 OTU104 1.390580e-03 0.038379997 Bacteria Firmicutes      Clostridia
+## 6 OTU115 1.804359e-03 0.040427044 Bacteria Firmicutes      Clostridia
+## 7  OTU83 2.050647e-03 0.040427044 Bacteria Firmicutes      Clostridia
+## 8   OTU8 2.719699e-03 0.041702048 Bacteria Firmicutes      Clostridia
+## 9 OTU123 2.719699e-03 0.041702048 Bacteria Firmicutes Erysipelotrichi
+##                Order              Family          Genus  Species
+## 1      Clostridiales     Lachnospiraceae    Coprococcus     &amp;lt;NA&amp;gt;
+## 2      Clostridiales     Ruminococcaceae   Oscillospira     &amp;lt;NA&amp;gt;
+## 3      Clostridiales     Lachnospiraceae [Ruminococcus]     &amp;lt;NA&amp;gt;
+## 4      Clostridiales     Lachnospiraceae           &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;
+## 5      Clostridiales     Lachnospiraceae        Blautia producta
+## 6      Clostridiales  [Mogibacteriaceae]           &amp;lt;NA&amp;gt;     &amp;lt;NA&amp;gt;
+## 7      Clostridiales     Lachnospiraceae        Blautia     &amp;lt;NA&amp;gt;
+## 8      Clostridiales     Lachnospiraceae [Ruminococcus]     &amp;lt;NA&amp;gt;
+## 9 Erysipelotrichales Erysipelotrichaceae  Coprobacillus     &amp;lt;NA&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we see that we have several Clostridiales organisms identified as differentially abundant. Next, we might use bootstrap resampling to see how often these results replicated in subsets of the data and calculate a measure of effect size. However, we will not do that here. Instead we will take a look at another approach that uses the Wilcoxon test on the CLR transformed data with some improvements in the treatment of zero values and presentation of effect size.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ANOVA-like differential expression (ALDEx2)&lt;/strong&gt; is a popular CoDA method for differential abundance testing. ALDEx2 can be run via a single command; however, there are several steps that are occurring in the background. &lt;strong&gt;At a high-level&lt;/strong&gt;, the steps include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Generate a large number (here n=128) of posterior probabilities for the observance of each taxon (i.e. output many data.frames where the counts have been converted to proportions). This is done by Monte-Carlo sampling from a Dirichlet distribution with a small non-zero prior to deal with zeros. The total read count therefore only contributes to the precision of the proportions.&lt;/li&gt;
+&lt;li&gt;Apply the centered log-ratio transformation to each instance.&lt;/li&gt;
+&lt;li&gt;Apply the Wilcoxon test to each taxon for each simulated instance.&lt;/li&gt;
+&lt;li&gt;Estimate the effect size as the difference between conditions divided by the maximum difference within conditions averaging over all instances. Scaling the between group difference by the maximum within group difference gives us a standardized effect size measure.&lt;/li&gt;
+&lt;li&gt;Obtain the expected p-values for each taxon by averaging over all instances.&lt;/li&gt;
+&lt;li&gt;Apply the BH-FDR correction to control the false positive rate.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For a more through explanation see the &lt;a href=&#34;https://www.bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.pdf&#34;&gt;ALDEx2 Bioconductor vignette&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Lets give it a try.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Run ALDEx2
+aldex2_da &amp;lt;- ALDEx2::aldex(data.frame(phyloseq::otu_table(ps)), phyloseq::sample_data(ps)$Status, test=&amp;quot;t&amp;quot;, effect = TRUE, denom=&amp;quot;iqlr&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## aldex.clr: generating Monte-Carlo instances and clr values&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## operating in serial mode&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## computing iqlr centering&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## aldex.ttest: doing t-test&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## aldex.effect: calculating effect sizes&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Plot effect sizes
+ALDEx2::aldex.plot(aldex2_da, type=&amp;quot;MW&amp;quot;, test=&amp;quot;wilcox&amp;quot;, called.cex = 1, cutoff = 0.05)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/aldex2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The output highlights the various steps for the ALDEx2 workflow. The interquartile log-ratio (iqlr) centering uses as the basis for the CLR transform the set of features that have variance values that fall between the first and third quartiles for all features in all groups in the dataset. This provides results that are more robust to asymmetric features between groups.&lt;/p&gt;
+&lt;p&gt;The effect size plot shows the median log2 fold difference by the median log2 dispersion. This is a measure of the effect size by the variability. Differentially abundant taxon will be those where the difference most exceeds the dispersion. Points toward the top of the figure are more abundant in CF samples while those towards the bottom are more abundant in healthy controls. Taxa with BH-FDR corrected p-values are shown in red. However, the authors state that:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;We prefer to use the effect size whenever possible rather than statistical significance since an effect size tells the scientist what they want to know—“what is reproducibly different between groups”; this is emphatically not something that P values deliver.
+Now we will print the output with the taxonomic classifications appended. WE use the FDR p-values here to facilitate the comparison with the results from Wilcoxon test ran outside of ALDEx2.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Clean up presentation
+sig_aldex2 &amp;lt;- aldex2_da %&amp;gt;%
+  rownames_to_column(var = &amp;quot;OTU&amp;quot;) %&amp;gt;%
+  filter(wi.eBH &amp;lt; 0.05) %&amp;gt;%
+  arrange(effect, wi.eBH) %&amp;gt;%
+  dplyr::select(OTU, diff.btw, diff.win, effect, wi.ep, wi.eBH)
+sig_aldex2 &amp;lt;- left_join(sig_aldex2, taxa_info)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Joining, by = &amp;quot;OTU&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;sig_aldex2&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##     OTU  diff.btw diff.win     effect        wi.ep      wi.eBH  Kingdom
+## 1  OTU8 -2.307035 5.522587 -0.3839105 0.0015096450 0.039837292 Bacteria
+## 2 OTU48  3.639216 6.528139  0.5283635 0.0025403967 0.042007768 Bacteria
+## 3 OTU44  3.541267 6.324375  0.5296702 0.0013725146 0.031600961 Bacteria
+## 4 OTU38  3.277257 4.696329  0.6206553 0.0000348666 0.004124241 Bacteria
+##       Phylum      Class         Order          Family          Genus
+## 1 Firmicutes Clostridia Clostridiales Lachnospiraceae [Ruminococcus]
+## 2 Firmicutes Clostridia Clostridiales Lachnospiraceae    Coprococcus
+## 3 Firmicutes Clostridia Clostridiales Lachnospiraceae [Ruminococcus]
+## 4 Firmicutes Clostridia Clostridiales Ruminococcaceae   Oscillospira
+##   Species
+## 1    &amp;lt;NA&amp;gt;
+## 2    &amp;lt;NA&amp;gt;
+## 3    &amp;lt;NA&amp;gt;
+## 4    &amp;lt;NA&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we see that again that several Clostridiales organisms are identified as differentially abundant. Consistent with the results of running the Wilcoxon test outside of ALDEx2, we see that OTU48, OTU38, OTU44, and OTU8 are listed as differentially abundant. The others do not reach the FDR cut-off used here; although, they likely have “largish” effect sizes. &lt;em&gt;Try and see if you can obtain these values.&lt;/em&gt; The reason for the discrepancy is hard to discern, but may be related to differences in the use of the CLR basis (geometric mean of all taxa versus the IQLR) and/or the use of the Bayesian resampling with a non-zero prior.&lt;/p&gt;
+&lt;p&gt;Often, if I consider performing DA testing, &lt;strong&gt;I will run several models and focus on the intersection of OTUs&lt;/strong&gt; and try to gain some insight into how the different normalization and/or models many be influencing the results.&lt;/p&gt;
+&lt;p&gt;There are &lt;strong&gt;MANY&lt;/strong&gt; other approaches that can be used to attempt to identify differently abundant taxa. Some that are popular, or that I find interesting, and can be implemented in R include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Count Regression for Correlated Observations with the Beta-binomial &lt;a href=&#34;https://github.com/bryandmartin/corncob&#34;&gt;(corncob)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://academic.oup.com/bioinformatics/article/34/4/643/4470360&#34;&gt;MicrobiomeDDA&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://joey711.github.io/phyloseq-extensions/DESeq2.html&#34;&gt;DESeq2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://sites.google.com/site/siddharthamandal1985/research&#34;&gt;Analysis of Composition of Microbiomes (ANCOM)&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Outside of R, a recently developed approach using &lt;a href=&#34;https://github.com/biocore/songbird&#34;&gt;multinomial regression via tensorflow&lt;/a&gt; and differential ranking looks promising.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;prediction&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Prediction&lt;/h1&gt;
+&lt;p&gt;As discussed by Dr. Haslam in the first lecture, the majority of clinical microbiome studies, conducted to date, have been correlative or focused on predicting outcomes using taxonomic abundances as the feature set. &lt;strong&gt;The predictive utility of the human microbiome in health and disease is of great interest&lt;/strong&gt; and numerous studies have reported the ability to predict outcomes from metagenomic data. For example, here are links to three studies suggesting taxonomic profiles in fecal samples may predict the occurrence of colorectal cancer (&lt;a href=&#34;https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5989068/&#34;&gt;1&lt;/a&gt;, &lt;a href=&#34;https://www.nature.com/articles/s41591-019-0405-7&#34;&gt;2&lt;/a&gt;, &lt;a href=&#34;https://www.nature.com/articles/s41591-019-0406-6&#34;&gt;3&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;As with differential abundance testing, there are many models or statistical learning approaches that can be applied to metagenomic data for the purpose of predicting an outcome. For binary outcomes, generating predicted probabilities for the outcome of interest using generalized linear models (GLMs) is one approach. Machine learning approaches have also been used extensively in microbiome research; however, these approaches may likely require much larger datasets than they have typically been trained on if our goal is reproducible results (the same likely goes for most studies using GLMs, etc.).&lt;/p&gt;
+&lt;p&gt;One challenge we face when building a predictive model from metagenomic data is that &lt;strong&gt;we often have more features (taxon) than we have samples.&lt;/strong&gt; For example, if we are working with microbial strains we might have more than 10,000 features to consider. One way to define high-dimensional data is when &lt;em&gt;p&lt;/em&gt; &amp;gt; &lt;em&gt;n&lt;/em&gt;, where: p = number of features and n = the number of samples. In these instances, one approach forward to reduce the dimensionality of the data. We did this earlier when we used PCA to extract the first two PCs that explained the largest fraction of variably in our data. Using a subset of the PCs as predictors in a GLM is known as principal components regression. We will give this approach a try below. Another is to include all the features as predictors, but to shrink their effects towards zero (or sometimes shrink them entirely out of the model). These approaches go by names such as ridge regression, LASSO, elastic nets, etc. Bayesian models with skeptical priors also can work well here. We will use a form of penalization on the principal components regression model below to highlight this approach and address potential overfitting even with just three PCs at this sample size (which is likely too small for robust prediction). A helpful guide to think about how many features or samples one might require to develop a predictive model is to consider how much overfitting you are willing to accept. Here are links to two excellent papers describing sample size determinations for &lt;a href=&#34;https://onlinelibrary.wiley.com/doi/full/10.1002/sim.7993&#34;&gt;continuous&lt;/a&gt; and &lt;a href=&#34;https://onlinelibrary.wiley.com/doi/full/10.1002/sim.7992&#34;&gt;binary&lt;/a&gt; outcomes in predictive modeling.&lt;/p&gt;
+&lt;p&gt;We will also examine a CoDA greedy stepwise selection model using balances that I think is a lot of fun…and very user-friendly.&lt;/p&gt;
+&lt;p&gt;For those interested in general resources for prediction modeling I recommend:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Frank Harrell’s Regression Modeling Stratagies &lt;a href=&#34;http://biostat.mc.vanderbilt.edu/wiki/Main/RmS&#34;&gt;website&lt;/a&gt; and &lt;a href=&#34;https://www.springer.com/us/book/9783319194240#aboutBook&#34;&gt;textbook&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Ewout Steyerberg’s Clinical Prediction Models &lt;a href=&#34;https://www.springer.com/gp/book/9780387772431&#34;&gt;textbook&lt;/a&gt; for a bit more introductory text&lt;/li&gt;
+&lt;li&gt;Max Kuhn’s Applied Predictive Modeling &lt;a href=&#34;http://appliedpredictivemodeling.com/&#34;&gt;textbook&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;James, Witten, Hastie, and Tibshirani’s &lt;a href=&#34;http://www-bcf.usc.edu/~gareth/ISL/&#34;&gt;An Introduction to Statistical Learning&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;First we will create a data.frame that contains the Status and the first 3 PCs from the centered-log ratio transformed abundance table we generated before. We will then plot the unconditional association for each PC with the outcome of CF versus control.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Generate data.frame
+clr_pcs &amp;lt;- data.frame(
+  &amp;quot;pc1&amp;quot; = ord_clr$CA$u[,1],
+  &amp;quot;pc2&amp;quot; = ord_clr$CA$u[,2],
+  &amp;quot;pc3&amp;quot; = ord_clr$CA$u[,3],
+  &amp;quot;Status&amp;quot; = phyloseq::sample_data(ps_clr)$Status
+)
+clr_pcs$Status_num &amp;lt;- ifelse(clr_pcs$Status == &amp;quot;Control&amp;quot;, 0, 1)
+head(clr_pcs)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##                    pc1         pc2           pc3          Status
+## ERR1331793  0.02850343 -0.07709724  0.0938970408 Chronic Fatigue
+## ERR1331872 -0.08156129  0.14193568  0.1155088427         Control
+## ERR1331819 -0.19356039 -0.08436341 -0.1048722096         Control
+## ERR1331794 -0.04193714  0.09705602  0.0110912849 Chronic Fatigue
+## ERR1331851  0.09994410  0.05534786 -0.0005008101 Chronic Fatigue
+## ERR1331834 -0.15577774  0.02921040 -0.0204667015         Control
+##            Status_num
+## ERR1331793          1
+## ERR1331872          0
+## ERR1331819          0
+## ERR1331794          1
+## ERR1331851          1
+## ERR1331834          0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Specify a datadist object (for rms)
+dd &amp;lt;- datadist(clr_pcs)
+options(datadist = &amp;quot;dd&amp;quot;)
+#Plot the unconditional associations
+a &amp;lt;- ggplot(clr_pcs, aes(x = pc1, y = Status_num)) +
+  Hmisc::histSpikeg(Status_num ~ pc1, lowess = TRUE, data = clr_pcs) +
+  labs(x = &amp;quot;\nPC1&amp;quot;, y = &amp;quot;Pr(Chronic Fatigue)\n&amp;quot;)
+b &amp;lt;- ggplot(clr_pcs, aes(x = pc2, y = Status_num)) +
+  Hmisc::histSpikeg(Status_num ~ pc2, lowess = TRUE, data = clr_pcs) +
+  labs(x = &amp;quot;\nPC2&amp;quot;, y = &amp;quot;Pr(Chronic Fatigue)\n&amp;quot;)
+c &amp;lt;- ggplot(clr_pcs, aes(x = pc3, y = Status_num)) +
+  Hmisc::histSpikeg(Status_num ~ pc3, lowess = TRUE, data = clr_pcs) +
+  labs(x = &amp;quot;\nPC3&amp;quot;, y = &amp;quot;Pr(Chronic Fatigue)\n&amp;quot;)
+cowplot::plot_grid(a, b, c, nrow = 2, ncol = 2, scale = .9, labels = &amp;quot;AUTO&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/plot%20pcs-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We see that we have the potential for some non-linear associations. Professor Harrell recommends that it is generally a good idea to assume some level of complexity since the penalty for allowing for a non-linear fit, when the association is in fact linear, is much less than when assuming linearity when the association is non-linear (i.e. you fit a straight line through a u-shaped curve). His &lt;a href=&#34;https://cran.r-project.org/web/packages/rms/index.html&#34;&gt;rms package&lt;/a&gt;, along with the tidyverse, are the two packages I use most often and allows us to model this type of complexity easily using &lt;a href=&#34;https://towardsdatascience.com/restricted-cubic-splines-c0617b07b9a5&#34;&gt;restricted cubic splines&lt;/a&gt;. These are a set of highly flexible, smoothly joined, piecewise polynomials entered for each variable. The number and placement of the knots helps control the flexibility. We will allow three knots for each term. However, this results in an additional 3 (6 total) model degrees of freedom…but we will shrink this down.&lt;/p&gt;
+&lt;p&gt;We first fit the full model and then perform a grid search to identify the optimum value for the penalty. We can also allow the penalty to differ for the simple and complex (i.e. nonlinear or interactions) terms. This is helpful if we want to allow for complexity, but down weight its impact. This would kind of be like adding more restrictive priors to the non-linear terms in a Bayesian model. We then plot the penalized log odds.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Fit full model with splines (3 knots each)
+m1 &amp;lt;- rms::lrm(Status_num ~ rcs(pc1, 3) + rcs(pc2, 3) + rcs(pc3, 3), data = clr_pcs, x = TRUE, y = TRUE)
+#Grid search for penalties
+pentrace(m1, list(simple = c(0, 1, 2), nonlinear = c(0, 100, 200)))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Best penalty:
+## 
+##  simple nonlinear       df
+##       1       200 2.783027
+## 
+##  simple nonlinear       df      aic       bic    aic.c
+##       0         0 6.000000 23.10845  8.523552 22.01754
+##       0       100 3.049209 28.21043 20.798359 27.90157
+##       1       100 2.810152 28.38363 21.552668 28.11659
+##       2       100 2.641219 28.11811 21.697792 27.87875
+##       0       200 3.024831 28.24577 20.892958 27.94131
+##       1       200 2.783027 28.42060 21.655570 28.15810
+##       2       200 2.611196 28.15166 21.804324 27.91706&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pen_m1 &amp;lt;- update(m1, penalty = list(simple = 1, nonlinear = 200))
+pen_m1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Logistic Regression Model
+##  
+##  rms::lrm(formula = Status_num ~ rcs(pc1, 3) + rcs(pc2, 3) + rcs(pc3, 
+##      3), data = clr_pcs, x = TRUE, y = TRUE, penalty = list(simple = 1, 
+##      nonlinear = 200))
+##  
+##  
+##  Penalty factors
+##  
+##   simple nonlinear interaction nonlinear.interaction
+##        1       200         200                   200
+##  
+##                       Model Likelihood     Discrimination    Rank Discrim.    
+##                          Ratio Test           Indexes           Indexes       
+##  Obs            84    LR chi2    33.99     R2       0.421    C       0.848    
+##   0             37    d.f.       2.783     g        1.759    Dxy     0.695    
+##   1             47    Pr(&amp;gt; chi2)&amp;lt;0.0001    gr       5.807    gamma   0.695    
+##  max |deriv| 1e-12    Penalty     2.34     gp       0.322    tau-a   0.347    
+##                                            Brier    0.159                     
+##  
+##            Coef    S.E.   Wald Z Pr(&amp;gt;|Z|) Penalty Scale
+##  Intercept  0.3458 0.2852  1.21  0.2254   0.0000       
+##  pc1       11.6489 2.8714  4.06  &amp;lt;0.0001  0.1098       
+##  pc1&amp;#39;       0.1202 0.9287  0.13  0.8970   1.0715       
+##  pc2        6.4946 2.5132  2.58  0.0098   0.1098       
+##  pc2&amp;#39;      -0.0015 0.7643  0.00  0.9984   1.2987       
+##  pc3       -3.8538 2.5659 -1.50  0.1331   0.1098       
+##  pc3&amp;#39;       0.0259 1.0080  0.03  0.9795   0.9856       
+## &lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Plot log odds
+ggplot(Predict(pen_m1))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/rms%20lrm-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We can see from the value of the penalties and the resultant log odds that the conditional associations are quite linear. However, we will leave in the cubic spline terms to fully account for the degrees of freedom we entertained in the model building process. The optimal penalties were 1 for the simple and 200 for the non-linear terms (higher is better for the corrected AIC) and the effective degrees of freedom shrunk to 2.78. We won’t interpret the coefficients here since we purposefully biased them towards zero.&lt;/p&gt;
+&lt;p&gt;The &lt;a href=&#34;https://en.wikipedia.org/wiki/Brier_score&#34;&gt;Brier score&lt;/a&gt; is 0.16 and provides a measure of the mean squared difference between the predicted probabilities and actual outcomes. Thus, it is a quadratic proper scoring rule. The c-statistic is analogous to the area under the receiver operating characteristic curve and is a measure of rank discrimination. Here it is c = 0.85.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;No we will perform bootstrap resampling to obtain an out-of-sample estimate of model performance. Here is a &lt;a href=&#34;https://thestatsgeek.com/2014/10/04/adjusting-for-optimismoverfitting-in-measures-of-predictive-ability-using-bootstrapping/&#34;&gt;link describing this in greater detail&lt;/a&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Obtain optimism corrected estimates
+(val &amp;lt;- rms::validate(pen_m1))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;##           index.orig training    test optimism index.corrected  n
+## Dxy           0.6952   0.7248  0.6817   0.0431          0.6521 40
+## R2            0.4206   0.4536  0.4295   0.0240          0.3965 40
+## Intercept     0.0000   0.0000 -0.0250   0.0250         -0.0250 40
+## Slope         1.0000   1.0000  1.0265  -0.0265          1.0265 40
+## Emax          0.0000   0.0000  0.0100   0.0100          0.0100 40
+## D             0.3927   0.4045  0.3749   0.0297          0.3630 40
+## U            -0.0238  -0.0238 -0.0073  -0.0165         -0.0073 40
+## Q             0.4165   0.4283  0.3822   0.0461          0.3704 40
+## B             0.1589   0.1481  0.1647  -0.0166          0.1755 40
+## g             1.7591   1.9083  1.9158  -0.0075          1.7666 40
+## gp            0.3218   0.3287  0.3363  -0.0076          0.3293 40&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Compute corrected c-statistic
+(c_opt_corr &amp;lt;- 0.5 * (val[1, 5] + 1))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0.8260443&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Plot calibration
+cal &amp;lt;- rms::calibrate(pen_m1, B = 200)
+plot(cal)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/rms%20val-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## n=84   Mean absolute error=0.01   Mean squared error=0.00018
+## 0.9 Quantile of absolute error=0.024&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Output pred. probs
+head(predict(pen_m1, type =&amp;quot;fitted&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ERR1331793 ERR1331872 ERR1331819 ERR1331794 ERR1331851 ERR1331834 
+##  0.4560689  0.4689260  0.1137757  0.6098891  0.8683044  0.2314747&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can see here that the Brier score is only mildly increased, and the c-statistic mildly decreased with repeated resampling. The calibration curve shows that the predictions are near the ideal across the range of predicted values. All-in-all this suggests we may expect to be able to predict patients with chronic fatigue from healthy controls with reasonable accuracy in a new sample of patients drawn from a similar population using just the three top PCs.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Now we will quickly show selbal as an alternaitve.&lt;/strong&gt; From the documentation selbal is described as:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;selbal is an R package for selection of balances in microbiome compositional data. As described in Rivera-Pinto et al. 2018 Balances: a new perspective for microbiome analysis &lt;a href=&#34;https://doi.org/10.1101/219386&#34; class=&#34;uri&#34;&gt;https://doi.org/10.1101/219386&lt;/a&gt;, selbal implements a forward-selection method for the identification of two groups of taxa whose relative abundance, or balance, is associated with the response variable of interest.
+It requires much less typing…so let’s give it a go. This approach is computationally expensive (especially with larger datasets). So below we only use 1 repeat of 5-fold cross-validation to tune the selections. In practice, we would want to turn these numbers up to get better estimates. We will also aggregate the taxa to the family-level to speed up the computation.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Agglomerate taxa
+(ps_family &amp;lt;- phyloseq::tax_glom(ps, &amp;quot;Family&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 30 taxa and 84 samples ]
+## sample_data() Sample Data:       [ 84 samples by 23 sample variables ]
+## tax_table()   Taxonomy Table:    [ 30 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 30 tips and 29 internal nodes ]
+## refseq()      DNAStringSet:      [ 30 reference sequences ]&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;phyloseq::taxa_names(ps_family) &amp;lt;- phyloseq::tax_table(ps_family)[, &amp;quot;Family&amp;quot;]
+#Run selbal
+cv_sebal &amp;lt;- selbal::selbal.cv(x = data.frame(t(data.frame(phyloseq::otu_table(ps_family)))), 
+                              y = phyloseq::sample_data(ps_family)$Status, 
+                              n.fold = 5, n.iter = 1)                             &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## 
+## ############################################################### 
+##  STARTING selbal.cv FUNCTION 
+## ###############################################################
+## 
+## #-------------------------------------------------------------# 
+## # ZERO REPLACEMENT . . .&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: MASS&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &amp;#39;MASS&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:dplyr&amp;#39;:
+## 
+##     select&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: NADA&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &amp;#39;NADA&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:IRanges&amp;#39;:
+## 
+##     cor&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:S4Vectors&amp;#39;:
+## 
+##     cor&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:stats&amp;#39;:
+## 
+##     cor&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: truncnorm&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: miscF&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: R2jags&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: rjags&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loading required package: coda&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning: package &amp;#39;coda&amp;#39; was built under R version 3.6.1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Linked to JAGS 4.3.0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Loaded modules: basemod,bugs&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &amp;#39;R2jags&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:coda&amp;#39;:
+## 
+##     traceplot&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &amp;#39;miscF&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:Hmisc&amp;#39;:
+## 
+##     rMultinom&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## , . . . FINISHED. 
+## #-------------------------------------------------------------#
+## 
+## #-------------------------------------------------------------# 
+## # Starting the cross - validation procedure . . .&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Warning in e$fun(obj, substitute(ex), parent.frame(), e$data): already
+## exporting variable(s): logit.acc&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+##  . . . finished. 
+## #-------------------------------------------------------------# 
+## ###############################################################
+## 
+##  The optimal number of variables is: 2&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Setting levels: control = Control, case = Chronic Fatigue&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Setting direction: controls &amp;lt; cases&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Setting levels: control = Control, case = Chronic Fatigue&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Setting direction: controls &amp;lt; cases&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## Attaching package: &amp;#39;gridExtra&amp;#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:Biobase&amp;#39;:
+## 
+##     combine&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:BiocGenerics&amp;#39;:
+## 
+##     combine&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## The following object is masked from &amp;#39;package:dplyr&amp;#39;:
+## 
+##     combine&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## 
+## 
+## ############################################################### 
+##  . . . FINISHED. 
+## ###############################################################&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#plot/print results
+cv_sebal$accuracy.nvar&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/selbal-1.png&#34; width=&#34;1344&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;plot.new()
+grid.draw(cv_sebal$global.plot)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2019-07-28-introduction-to-the-statistical-analysis-of-microbiome-data-in-r_files/figure-html/selbal-2.png&#34; width=&#34;1344&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Here we can see that the cross-validation selected the two balance object as having “among” the best rank-discrimination. It selected the balance with erysipelotrichaceae in the numerator and bifidobacteriaceae in the denominator. So a higher relative abundance of erysipelotrichaceae to bifidobacteriaceae was among the most informative balances. The AUC was 0.77, but as low as AUC = 0.68 with 1 repeat of 5 fold cross-validation.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Give the model a try on the full ps object on your own.&lt;/strong&gt; It should run in ~5 min on a standard laptop. &lt;em&gt;How does the performance compare? Would you expect these results to be as reproducible as the GLM we fit? Why?&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;that-concludes-this-session.&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;That concludes this session.&lt;/h1&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
