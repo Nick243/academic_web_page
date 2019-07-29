@@ -1,5 +1,7 @@
 blogdown
-public
 .DS_Store
 Thumbs.db
-public
+.Rproj.user
+
+
+#add public once get to auto configure from github
