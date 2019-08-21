@@ -6,10 +6,265 @@
     <description>Recent content in Microbiome on </description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 28 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 21 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/tags/microbiome/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Denoising Amplicon Sequence Data Using USEARCH and UNOISE3</title>
+      <link>/post/denoising-amplicon-sequence-data-using-usearch-and-unoise3/</link>
+      <pubDate>Wed, 21 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/denoising-amplicon-sequence-data-using-usearch-and-unoise3/</guid>
+      <description>
+
+
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;During the &lt;a href=&#34;https://github.com/Nick243/Introduction-to-Metagenomics-Summer-Workshop-2019&#34;&gt;Introduction to Metagenomics Summer Workshop&lt;/a&gt; we discussed denoising amplicon sequence variants and worked through Ben Callahan’s &lt;a href=&#34;https://benjjneb.github.io/dada2/tutorial.html&#34;&gt;DADA2 tutorial&lt;/a&gt;. During that session, I mentioned several other approaches and algorithms for denoising or clustering amplicon sequence data including &lt;strong&gt;UNOISE3, DeBlur and Mothur&lt;/strong&gt;. I also mentioned I would try to post some example workflows for some of these other approaches to highlight the similarities, as well as the differences. &lt;em&gt;It looks like I am just now getting around to it.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;I was recently involved in a project where we downloaded a large number of amplicon sequence data from the NCBI SRA and denoised these data using &lt;a href=&#34;https://www.drive5.com/usearch/manual/cmd_unoise3.html&#34;&gt;UNOISE3&lt;/a&gt;. So, I figured this might provide a good opportunity to share some example code on how one could use Robert Edgar’s &lt;a href=&#34;https://drive5.com/usearch/&#34;&gt;USEARCH software&lt;/a&gt; to process 16S rRNA gene sequence data.&lt;/p&gt;
+&lt;p&gt;In this post, I will not go into much (hardly any) detail about the specifics of each step or the UNOISE3 algorithm itself. This is because Dr. Edgar has an excellent and extensive &lt;a href=&#34;https://www.drive5.com/usearch/manual/uparse_pipeline.html&#34;&gt;webpage&lt;/a&gt; where he provides all this information already. My goal here is simply to point you to this resource and provide some example code. &lt;strong&gt;I highly recommend you spend some time going through his webpage.&lt;/strong&gt; It provides a wealth of information on many topics and challenges you will encounter when working with metagenomic data. It also provides many of this thoughts on current best practices for processing amplicon sequence data generated via short read technologies. I have been following his work for several years and still pick up something new every time I start digging through his pages.&lt;/p&gt;
+&lt;p&gt;One difference you will notice is that USEARCH does require a license (32-bit is available for free) and is not open-source software. While open-source replications with some modifications do exist, I prefer to use the licensed version as it contains the most up-to-date features and credits the developer’s intellectual contributions. I am also fortunate to be at an institution where this provides no hardship. This choice will be different for everyone.&lt;/p&gt;
+&lt;p&gt;So anyway…lets’ get started.&lt;/p&gt;
+&lt;p&gt;The code below assumes we are working with paired-end sequence files pulled down from the NCBI SRA. The sequence files were generated on the Illumina MiSeq using V4 (515F and 806R) primers. The specific region targeted is not all that relevant to this example; however, we might/should consider different parameters related to the merging of the forward and reverse reads etc. if we had a different amplicon spanning region (i.e. more or less overlap).&lt;/p&gt;
+&lt;p&gt;This workflow also assumes that all non-biological bases and primer sequences have been removed and that all files are stored in a single directory (in this example in a folder on my desktop). I am running 64-bit USEARCH (version 11) for the Mac OS.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;div id=&#34;rename-files-to-leverage-fastq_mergepairs--relabel&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Rename files to leverage fastq_mergepairs -relabel&lt;/h1&gt;
+&lt;p&gt;Paired-end sequence data pulled down from the NCBI SRA has a file structure consisting of the SRR ID followed by &amp;quot;_1&amp;quot; and &amp;quot;_2&amp;quot; denoting the forward and reserve read files, respectively. Providing the data to the fastq_mergepairs command with the suffixes &amp;quot;_R1&amp;quot; and &amp;quot;_R2&amp;quot; allows the -relabel option to identify the corresponding forward and reverse read files (based on the file names) and generate the sample name from the FASTQ filename by truncating at the first underscore or period. This is an &lt;strong&gt;extremely helpful&lt;/strong&gt; option so we will go ahead and rename the files to have the structure expected by the fastq_mergepairs command and -relable option.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Renaming files to work with the fastq_mergepairs -relabel command
+for file in *; do mv &amp;quot;$file&amp;quot; ${file//_1/_R1}; done
+for file in *; do mv &amp;quot;$file&amp;quot; ${file//_2/_R2}; done&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;unoise3-pipeline&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;UNOISE3 pipeline&lt;/h1&gt;
+&lt;p&gt;The code below processes the raw fastq files and &lt;strong&gt;returns denoised zero-radius OTUs (zOTUs)&lt;/strong&gt;; also known as amplicon sequence variants (ASVs). Robert Edgar provides example scripts for Illumina paired-end (as well as unpaired) data on his &lt;a href=&#34;https://www.drive5.com/usearch/manual/tutorials.html&#34;&gt;website&lt;/a&gt;. His scripts served as the basis for the code below…and I have generally tried to maintain his recommendations…with some minor modifications for these data.&lt;/p&gt;
+&lt;p&gt;The code below will:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Merge the paired-end reads (while performing some filtering) and generate fasta and fastq files containing reads for all samples combined&lt;/li&gt;
+&lt;li&gt;Extract the sample names as a separate text file&lt;/li&gt;
+&lt;li&gt;Filter the combined fastq file based on expected errors derived from the Illumina quality scores&lt;/li&gt;
+&lt;li&gt;Generate a list of unique, high-quality reads allowed to form new seeds (denoised zOTUs)&lt;/li&gt;
+&lt;li&gt;Apply the UNOISE3 algorithm to generate the list of zOTUs&lt;/li&gt;
+&lt;li&gt;Output a denoising report&lt;/li&gt;
+&lt;li&gt;Map the reads for each sample to the list of zOTUs and form an “OTU” table&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This section below will take a bit of time to run; however, compared to other denoising approaches USEARCH/UNOISE is very fast and processed these ~2,500 PE files in a few hours. I am allowing for parallel computation to occur where possible using the -threads option (I think 10 cores is actually the upper limit). I also output log files for review at several steps.&lt;/p&gt;
+&lt;p&gt;You could also use an alias for /Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 so you do not have to type this each time.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Merge paired-end reads
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -fastq_mergepairs *_R1.fastq -relabel @ -fastaout merged.fa -fastqout merged.fq  -fastq_maxdiffs 5 -fastq_pctid 90 -fastq_minmergelen 251 -fastq_maxmergelen 257 -log merge_log.txt -threads 16
+
+#Extract sample names
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -fastx_get_sample_names merged.fq -output samples.txt -threads 16
+
+#Filter reads with &amp;gt; 1 expected error
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -fastq_filter merged.fq -fastq_maxee 1.0 -fastaout filtered.fa -relabel Filt -threads 16 -log filter_log.txt
+
+#Dereplicate high-quality reads
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -fastx_uniques filtered.fa -sizeout -relabel Uniq -fastaout uniques.fa -threads 16 -log uniques_log.txt
+
+#Denoise sequences using UNOISE3 algorithum
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -unoise3 uniques.fa -zotus zotus.fa -threads 16 -log unoise_log.txt
+
+#Get denoising report
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -fastx_learn uniques.fa -output denoising_report.txt -threads 16
+
+#Map reads to zOTUs and construct OTU table
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -otutab merged.fq -zotus zotus.fa -strand plus -otutabout unoise3_zotu_table.txt -mapout zmap.txt -threads 16 -log otutab_log.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;When running the fastq_mergepairs command on this many samples, I got a strange error that I have too many opened folders and it caused the program to error (not process all the files). This looks to be a Mac issue…not USEARCH…and perhaps something I need to tweak/fix on my local machine. While this has only happened to me once, should it happen to you, Robert Edgar kindly recommended a quick and simple workaround. Just place the fastq_mergepairs command in a loop, concatenate the files, and proceed as usual.&lt;/p&gt;
+&lt;p&gt;Here is what that code would look like. Just drop it in in place of the first command above.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Merge_fastq in a loop to limit the amount of total overhead
+for read1 in *_R1*;
+  do /Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -fastq_mergepairs $read1 -relabel @ -fastaout &amp;quot;$read1&amp;quot;_merged.fa -fastqout &amp;quot;$read1&amp;quot;_merged.fq  -fastq_maxdiffs 5 -fastq_pctid 90 -fastq_minmergelen 251 -fastq_maxmergelen 257 -log &amp;quot;$read1&amp;quot;_merge_log.txt -threads 16;
+done
+
+for file in *; do mv &amp;quot;$file&amp;quot; ${file//_R1.fastq_merged/}; done
+
+mkdir merge_logs; mv *txt merge_logs/.
+
+cat *fa &amp;gt;&amp;gt; merged.fasta
+cat *fq &amp;gt;&amp;gt; merged.fastq
+
+rm *.fa; rm *.fq
+mv merged.fasta merged.fa; mv merged.fastq merged.fq&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;generate-distance-matrix-and-phylogenetic-tree&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Generate distance matrix and phylogenetic tree&lt;/h1&gt;
+&lt;p&gt;Some downstream alpha- and beta-diversity calculations such as Faith’s Phylogenetic Diversity or the UniFrac distance require a phylogenetic tree. In USEARCH you can generate a distance matrix using the &lt;a href=&#34;https://www.drive5.com/usearch/manual/cmd_calc_distmx.html&#34;&gt;calc_distmx&lt;/a&gt; command, as well as perform agglomerative clustering and output a Newick formatted tree file using the &lt;a href=&#34;https://drive5.com/usearch/manual/cmd_cluster_aggd.html&#34;&gt;cluster_aggd&lt;/a&gt; command.&lt;/p&gt;
+&lt;p&gt;Below is how one would do this.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Generate distance matrix
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -calc_distmx zotus.fa -tabbedout zotus_dm.txt -threads 16 -log calcdist_log.txt
+
+#Perform agglomerative clustering and output tree file
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -cluster_aggd zotus_dm.txt -treeout unoise3.tree -threads 16 -log cluster_tree_log.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;taxonomic-classification-with-sintax&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Taxonomic classification with SINTAX&lt;/h1&gt;
+&lt;p&gt;Taxonomic classification can be performed within USEARCH using the sintax command. The sintax command uses the SINTAX algorithm to predict taxonomy for query sequences in FASTA or FASTQ format. Here is the &lt;a href=&#34;https://drive5.com/usearch/manual/cmd_sintax.html&#34;&gt;link&lt;/a&gt; to a description of the approach on Dr. Edgar’s webpage. Here are links to the SINTAX &lt;a href=&#34;https://www.biorxiv.org/content/10.1101/074161v1&#34;&gt;publication&lt;/a&gt; and a link to a discussion on which database should be used for &lt;a href=&#34;https://drive5.com/usearch/manual/faq_tax_db.html&#34;&gt;classifaction&lt;/a&gt;. In short, he recommends using a database of authoritatively classified sequences such as the most recent RDP training set or LTP release that &lt;strong&gt;includes only type strain and isolate sequences&lt;/strong&gt;; and not predictions.&lt;/p&gt;
+&lt;p&gt;I like the SINTAX algorithm as it performs as well as the naive RDP classifier (not sure many algorithums do much better) and the approach is more intuitive to me and just requires finding the top hits in a reference database.&lt;/p&gt;
+&lt;p&gt;Here is the code to classify these sequences against the RDP database at a cutoff of 0.8. Links to this database and others are provided &lt;a href=&#34;https://drive5.com/usearch/manual/sintax_downloads.html&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Obtain taxonomy predictions with SINTAX
+/Users/olljt2/documents/usearch/v11/usearch11.0.667_i86osx64 -sintax zotus.fa -db /Users/olljt2/documents/usearch/v11/rdp_16s_v16.fa -strand both -tabbedout rdp_sintax_unoise3.txt -sintax_cutoff 0.8 -threads 16 -log sintax_log.txt&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;combine-elements-into-a-phyloseq-object&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Combine elements into a phyloseq object&lt;/h1&gt;
+&lt;p&gt;While Robert Edgar has built some nice new functionally to perform downstream analyses using USEARCH directly, I typically conduct of most of my statistical analysis in R. This has nothing to do with the available commands in USEARCH, rather the choice is based on my familiarity with R and the large number of packages that are now available, and continuing to grow, for the downstream analysis of metagenomic data.&lt;/p&gt;
+&lt;p&gt;When I work with metagenomic data in R, my first step is always to store the data as a &lt;a href=&#34;https://joey711.github.io/phyloseq/&#34;&gt;phyloseq object&lt;/a&gt; to facilitate improved data management and analysis options. The code below can be run within R to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Read in the representative sequences, phylogenic tree, OTU table, and taxonomy predictions generated above&lt;/li&gt;
+&lt;li&gt;Parse the taxonomy table&lt;/li&gt;
+&lt;li&gt;Create a phyloseq object&lt;/li&gt;
+&lt;li&gt;Add the sample name as a sample_data column&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I typically just save this as an R script and call it form the command line with: Rscript /Users/olljt2/Desktop/unoise3_to_phyloseq.R&lt;/p&gt;
+&lt;p&gt;The parsing of the taxonomy table is specific to the structure of RDP database. This would need to be modified to be used with a different database such as Silva or Greengenes.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#!/usr/bin/Rscript
+
+library(tidyverse); packageVersion(&amp;quot;tidyverse&amp;quot;)
+library(phyloseq); packageVersion(&amp;quot;phyloseq&amp;quot;)
+
+rep = Biostrings::readDNAStringSet(&amp;quot;zotus.fa&amp;quot;)
+TREE &amp;lt;- read_tree(&amp;quot;unoise3.tree&amp;quot;)
+
+seq.tab &amp;lt;- read.delim(&amp;quot;unoise3_zotu_table.txt&amp;quot;)
+seq.tab &amp;lt;- data.frame(seq.tab[,-1], row.names=seq.tab[, 1])
+
+tax.table &amp;lt;- read.delim(&amp;quot;rdp_sintax_unoise3.txt&amp;quot;, header = FALSE)
+
+tax_table &amp;lt;- tax.table %&amp;gt;%
+  select(V1, V4) %&amp;gt;%
+  separate(V4, c(&amp;quot;Domain&amp;quot;, &amp;quot;Phylum&amp;quot;, &amp;quot;Class&amp;quot;, &amp;quot;Order&amp;quot;, &amp;quot;Family&amp;quot;, &amp;quot;Genus&amp;quot;, &amp;quot;Species&amp;quot;), sep = &amp;quot;,&amp;quot;) %&amp;gt;%
+  mutate(Domain = gsub(&amp;quot;d:&amp;quot;, &amp;quot;&amp;quot;, Domain),
+         Phylum = gsub(&amp;quot;p:&amp;quot;, &amp;quot;&amp;quot;, Phylum),
+         Class = gsub(&amp;quot;c:&amp;quot;, &amp;quot;&amp;quot;, Class),
+         Order = gsub(&amp;quot;o:&amp;quot;, &amp;quot;&amp;quot;, Order),
+         Family = gsub(&amp;quot;f:&amp;quot;, &amp;quot;&amp;quot;, Family),
+         Genus = gsub(&amp;quot;g:&amp;quot;, &amp;quot;&amp;quot;, Genus),
+         Species = gsub(&amp;quot;s:&amp;quot;, &amp;quot;&amp;quot;, Species))
+
+tax_table &amp;lt;- data.frame(tax_table[,-1], row.names=tax_table[, 1])
+
+(ps_unoise3 &amp;lt;- phyloseq(otu_table(seq.tab, taxa_are_rows=TRUE),
+                        tax_table(as.matrix(tax_table)),
+                        rep,
+                        TREE))
+
+samp_df &amp;lt;- data.frame(sample_names(ps_unoise3))
+samp_df$srr_id &amp;lt;- samp_df$sample_names.ps_unoise3.
+samp_df &amp;lt;- data.frame(samp_df, row.names = 1)
+(ps_unoise3 &amp;lt;- merge_phyloseq(ps_unoise3, sample_data(samp_df)))
+
+saveRDS(ps_unoise3, &amp;quot;ps_unoise3.rds&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;clean-up-file-structure&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Clean up file structure&lt;/h1&gt;
+&lt;p&gt;I think the goal of this section is self-evident. This code just tidies up all the files generated above. Add a line to compress the files if you would like.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Cleaning up file structure
+mkdir logs; mkdir seqs; mkdir unoise
+mv *unoise3* unoise/.; mv zmap.txt unoise/.; mv zotus.fa unoise/.; mv zotus_dm.txt unoise/.
+mv denoising_report.txt logs/.; mv *log.txt logs/. ; mv samples.txt logs/.
+mv *.fa seqs/.; mv *.fq seqs/.; mv *.fastq seqs/.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;bonus-working-with-single-end-reads&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Bonus: Working with single-end reads&lt;/h1&gt;
+&lt;p&gt;On a few occasions I have been involved with projects that only conducted single-end sequencing (rare) or older data and/or poor choice of primers where only the forward reads could be retained for analysis (less rare). The modification to the above workflow for single-end data is quite simple.&lt;/p&gt;
+&lt;p&gt;The only material difference to the UNOISE pipeline describe above is to remove the merge paired-end reads step and just replace it by concatenating all the single-end read files into a combined fastq file. Then you can proceed with the rest of the steps as provided above.&lt;/p&gt;
+&lt;p&gt;The code to combine all the fastq files, assuming they are all placed in the same directory (and end in fastq) and the directory does not contain any other fastq files, just requires the cat command and outputting the new file. It’s always nice when things are simple!&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;cat *fastq &amp;gt;&amp;gt; raw_merged.fq&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;I hope the Explanations and code snippets above are helpful. Please send me any questions or post them here.&lt;/p&gt;
+&lt;p&gt;A great way to get started using USEARCH would be to download a 32-bit version of &lt;a href=&#34;https://drive5.com/usearch/download.html&#34;&gt;USEARCH&lt;/a&gt; and work through Dr. Edgar’s &lt;a href=&#34;https://www.drive5.com/usearch/manual/tutorials.html&#34;&gt;example scripts and tutorials&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;However, you may require a 64-bit license to work with your own data.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Downloading Amplicon Sequence Runs from the NCBI SRA</title>
+      <link>/post/downloading-amplicon-sequence-runs-from-the-ncbi-sra/</link>
+      <pubDate>Tue, 20 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/downloading-amplicon-sequence-runs-from-the-ncbi-sra/</guid>
+      <description>
+
+
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;A collaborator recently asked if I could help pull down a few thousand sequence files from the NCBI &lt;a href=&#34;https://www.ncbi.nlm.nih.gov/sra&#34;&gt;Sequence Read Archive&lt;/a&gt; (SRA) for a secondary analysis. This is a &lt;strong&gt;short&lt;/strong&gt; post primarily to help me (and hopefully others) remember how to do this once you have a set of SRR IDs of interest.&lt;/p&gt;
+&lt;p&gt;While I came across several great resources providing information on how to download SRA files using the SRA Toolkit, I wanted to retain just the basics, and some example code, should this type of request come across my desk again in the future. Hopefully this post will keep me from having to start from scratch the next time this comes up and not rehash the same mistakes I made the first time around.&lt;/p&gt;
+&lt;p&gt;There are several great resources for learning more about accessing data and metadata from the SRA including:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The &lt;a href=&#34;https://www.ncbi.nlm.nih.gov/sra/docs/sradownload/&#34;&gt;NCBI SRA Download Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;An excellent series of posts from &lt;a href=&#34;https://edwards.sdsu.edu/research/lab-blog/sra/&#34;&gt;Rob Edwards&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Morgan Langille’s very helpful &lt;a href=&#34;https://github.com/LangilleLab/microbiome_helper/wiki/Download_From_SRA&#34;&gt;Download_From_SRA wiki&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;However, for this type of request, all I think I will need to remember is a few lines of code and that I want to grab the fastq files, &lt;strong&gt;in parallel and without compression&lt;/strong&gt;, to save time.&lt;/p&gt;
+&lt;p&gt;So below is what I think will be most useful once one has a set of SRR IDs of interest.&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;div id=&#34;installing-the-sra-toolkit-using-homebrew&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Installing the SRA ToolKit using Homebrew:&lt;/h1&gt;
+&lt;p&gt;I typically work on an iMac pro and have access to multiple cores for parallel computing. Installation of the &lt;a href=&#34;https://github.com/ncbi/sra-tools/wiki&#34;&gt;SRA Toolkit&lt;/a&gt; can be performed quickly on a Mac using &lt;a href=&#34;https://en.wikipedia.org/wiki/Homebrew_(package_management_software)&#34;&gt;Homebrew&lt;/a&gt;. Installing parallel will also allow you to perform the download…well…in parallel.&lt;/p&gt;
+&lt;p&gt;If you are working on a Linux or Windows machine binaries can be found &lt;a href=&#34;https://github.com/ncbi/sra-tools/wiki/01.-Downloads&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The code below will install both the toolkit and parallel.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Install SRA toolkit
+brew install sratoolkit
+
+#Install parallel
+brew install parallel&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;create-a-new-folder-that-will-contain-the-files&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Create a new folder that will contain the files:&lt;/h1&gt;
+&lt;p&gt;Now we simply want to open the terminal, create a new folder that will house the sequence files, and navigate to that folder before running the fastq-dump command. Here I am creating a new folder on my desktop that will store a bunch of fastq files generated from 16s rRNA gene sequencing on the Illumina MiSeq. As you can guess from the name, these files come from the well-known RISK IBD cohort.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#Make new folder that will contain the seqs
+mkdir /Users/olljt2/desktop/risk_16s_seqs
+
+#Move into the folder before starting download
+cd /Users/olljt2/desktop/risk_16s_seqs&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;download-the-srr-runs&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Download the SRR runs:&lt;/h1&gt;
+&lt;p&gt;Now the fun part. The fastq-dump command will:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Download the sequence data for each SRR ID contained in the /Users/olljt2/desktop/sra_ids.txt text file&lt;/li&gt;
+&lt;li&gt;Download the data as fastq files (without compression)&lt;/li&gt;
+&lt;li&gt;Run the job over 16 threads (modify per the number available on your machine)&lt;/li&gt;
+&lt;li&gt;Dump each run into a separate file (so we will have either 1 or 2 fastqs per SRR ID depending on whether the run used single- or paired-end sequencing)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A full list of the fastq-dump options can be found &lt;a href=&#34;https://ncbi.github.io/sra-tools/fastq-dump.html&#34;&gt;here&lt;/a&gt;. I prefer to download the files without compression as this greatly reduces the download time. Once the files are on your local machine, you can then go ahead and compress them at your leisure without worrying about maintaining the connection.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;parallel --jobs 16 &amp;quot;fastq-dump --split-files {}&amp;quot; ::: $(cat /Users/olljt2/desktop/sra_ids.txt)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;The sra_ids.txt text file called above is simply a tab-delimited text file with no header that has a structure of…&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;SRR2061872 
+SRR1636304 
+SRR1635772 
+SRR1213188 
+SRR1565299&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;br&gt;&lt;/p&gt;
+&lt;p&gt;Hopefully, I will now remember where to find this information, and snippets of code, the next time the need arises!&lt;/p&gt;
+&lt;p&gt;&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>Introduction to Phyloseq</title>

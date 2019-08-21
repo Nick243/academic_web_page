@@ -1,0 +1,124 @@
+---
+title: Downloading Amplicon Sequence Runs from the NCBI SRA
+author: Nicholas Ollberding
+date: '2019-08-20'
+slug: downloading-amplicon-sequence-runs-from-the-ncbi-sra
+categories:
+  - Microbiome
+tags:
+  - Microbiome
+  - SRA
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2019-08-21T11:38:10-04:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br>
+
+A collaborator recently asked if I could help pull down a few thousand sequence files from the NCBI [Sequence Read Archive](https://www.ncbi.nlm.nih.gov/sra) (SRA) for a secondary analysis. This is a **short** post primarily to help me (and hopefully others) remember how to do this once you have a set of SRR IDs of interest. 
+
+While I came across several great resources providing information on how to download SRA files using the SRA Toolkit, I wanted to retain just the basics, and some example code, should this type of request come across my desk again in the future. Hopefully this post will keep me from having to start from scratch the next time this comes up and not rehash the same mistakes I made the first time around.
+
+There are several great resources for learning more about accessing data and metadata from the SRA including:
+
+* The [NCBI SRA Download Guide](https://www.ncbi.nlm.nih.gov/sra/docs/sradownload/)
+* An excellent series of posts from [Rob Edwards](https://edwards.sdsu.edu/research/lab-blog/sra/)
+* Morgan Langille's very helpful [Download_From_SRA wiki](https://github.com/LangilleLab/microbiome_helper/wiki/Download_From_SRA)
+
+<br>
+
+However, for this type of request, all I think I will need to remember is a few lines of code and that I want to grab the fastq files, **in parallel and without compression**, to save time. 
+
+So below is what I think will be most useful once one has a set of SRR IDs of interest.
+
+
+<br>
+
+
+# Installing the SRA ToolKit using Homebrew:
+
+I typically work on an iMac pro and have access to multiple cores for parallel computing. Installation of the [SRA Toolkit](https://github.com/ncbi/sra-tools/wiki) can be performed quickly on a Mac using [Homebrew](https://en.wikipedia.org/wiki/Homebrew_(package_management_software)). Installing parallel will also allow you to perform the download...well...in parallel.   
+
+If you are working on a Linux or Windows machine binaries can be found [here](https://github.com/ncbi/sra-tools/wiki/01.-Downloads).
+
+The code below will install both the toolkit and parallel. 
+
+
+```{r installing_programs, eval=FALSE}
+#Install SRA toolkit
+brew install sratoolkit
+
+#Install parallel
+brew install parallel
+```
+
+
+<br>
+<br>
+
+
+# Create a new folder that will contain the files:
+
+Now we simply want to open the terminal, create a new folder that will house the sequence files, and navigate to that folder before running the fastq-dump command. Here I am creating a new folder on my desktop that will store a bunch of fastq files generated from 16s rRNA gene sequencing on the Illumina MiSeq. As you can guess from the name, these files come from the well-known RISK IBD cohort. 
+
+```{r new_folder, eval=FALSE}
+#Make new folder that will contain the seqs
+mkdir /Users/olljt2/desktop/risk_16s_seqs
+
+#Move into the folder before starting download
+cd /Users/olljt2/desktop/risk_16s_seqs
+```
+
+
+<br>
+<br>
+
+
+# Download the SRR runs:
+
+Now the fun part.  The fastq-dump command will:
+
+* Download the sequence data for each SRR ID contained in the /Users/olljt2/desktop/sra_ids.txt text file
+* Download the data as fastq files (without compression)
+* Run the job over 16 threads (modify per the number available on your machine)
+* Dump each run into a separate file (so we will have either 1 or 2 fastqs per SRR ID depending on whether the run used single- or paired-end sequencing)
+
+A full list of the fastq-dump options can be found [here](https://ncbi.github.io/sra-tools/fastq-dump.html). I prefer to download the files without compression as this greatly reduces the download time.  Once the files are on your local machine, you can then go ahead and compress them at your leisure without worrying about maintaining the connection.  
+  
+
+```{r download, eval=FALSE}
+parallel --jobs 16 "fastq-dump --split-files {}" ::: $(cat /Users/olljt2/desktop/sra_ids.txt)
+```
+
+<br>
+
+The sra_ids.txt text file called above is simply a tab-delimited text file with no header that has a structure of... 
+```{r text_file, eval=FALSE}
+
+SRR2061872 
+SRR1636304 
+SRR1635772 
+SRR1213188 
+SRR1565299
+
+```
+
+
+<br>
+
+Hopefully, I will now remember where to find this information, and snippets of code, the next time the need arises! 
+
+<br>
+<br>
+
