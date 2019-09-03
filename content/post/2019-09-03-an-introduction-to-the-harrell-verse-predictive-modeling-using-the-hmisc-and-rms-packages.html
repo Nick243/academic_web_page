@@ -1,0 +1,1109 @@
+---
+title: 'An Introduction to the Harrell“verse”: Predictive Modeling using the Hmisc
+  and rms Packages'
+author: Nicholas Ollberding
+date: '2019-09-03'
+slug: an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages
+categories:
+  - Predictive Modeling
+tags:
+  - R
+  - rms
+  - Hmisc
+  - Data Analysis
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2019-09-03T14:18:59-04:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+
+
+<p><br></p>
+<p>This is post is to introduce members of the <strong>Cincinnati Children’s Hospital Medical Center R Users Group</strong> <a href="https://github.com/CCHMC-RUG">(CCHMC-RUG)</a> to some of the functionality provided by Frank Harrell’s <a href="http://biostat.mc.vanderbilt.edu/wiki/Main/Hmisc">Hmisc</a> and <a href="http://biostat.mc.vanderbilt.edu/wiki/Main/Rrms">rms</a> packages for data description and predictive modeling. For those of you who have worked with these packages before, hopefully we will cover something new. Dr. Harrell is the founding chair of the Department of Biostatistics at Vanderbilt University (until 2017), Fellow of the American Statistical Association, and a member of the <a href="https://www.r-project.org/foundation/">R Foundation</a>. A full biography and list of his numerous accomplishments and honors can be found on his Vanderbilt University <a href="http://biostat.mc.vanderbilt.edu/wiki/Main/FrankHarrell">webpage</a>.</p>
+<p>I titled the post <em>An Introduction to the Harrell“verse”</em>, because like the tidyverse, these packages are a tremendous resource for the R community; share an underlying grammar and data structure; and reflect the opinioned philosophy of the developer. I also like the term <em>Harrell“verse”</em> because the <strong>Hmisc and rms packages link users to a much broader set of materials on modern statistical methods and computing including predictive modeling, estimation, hypothesis testing, and study design.</strong> I have no idea how he finds the time to develop these rich and intensive resources, and share his thoughts on social media and elsewhere, but his contributions open-source software and insight into the application of statistical methods are much appreciated! Links to many of these materials can be found at his <a href="http://biostat.mc.vanderbilt.edu/wiki/Main/FrankHarrell">webpage</a>. A few highlights include:</p>
+<ul>
+<li>His <a href="https://www.fharrell.com/">Statistical Thinking blog</a></li>
+<li>The <a href="http://biostat.mc.vanderbilt.edu/wiki/Main/RmS">Regression Modeling Strategies textbook, courses, and course notes</a>. I have taken both his 1-day and full week courses and highly recommend them!</li>
+<li>Biostatistics for Biomedical Research <a href="http://hbiostat.org/doc/bbr.pdf">e-book</a></li>
+<li>datamethods <a href="https://discourse.datamethods.org/">webpage</a></li>
+<li>Numerous contributions on <a href="https://stats.stackexchange.com/users/4253/frank-harrell">stackexchange</a></li>
+<li>He also is extremely active on <a href="https://twitter.com/f2harrell?lang=en">twitter</a></li>
+<li>And as of recent, leads a weekly one-hour live webinar on applied statistics/biostatistics</li>
+</ul>
+<p><br></p>
+<p>My goal for this RUG session is to briefly introduce you to some of the functionally of the Hmisc and rms packages that I think will be of interest to anyone performing statistical modeling in R. <strong>These examples are shown at a <em>high-level</em> and are not meant to demonstrate “best practices” with respect to model building and validation, etc.</strong> They just serve to show some of the tools these package can help you bring to bear on a project once working in the <em>Harrell“verse”</em>.</p>
+<p>Below, I present various functions found in these packages as a series of five tips These <em>“tips”</em> just scratch the surface of the what is possible with Hmisc and rms, but I hope serve to highlight how model complexity can be more easily incorporated when fitting generalized linear models, fitted models visualized, and predictions made and validated when using these packages. Topics covered include:</p>
+<ol style="list-style-type: decimal">
+<li>Examining your data with Hmisc</li>
+<li>Regression modeling allowing for complexity with rms</li>
+<li>Validating fitted models with rms::validate() and rms:calibrate()</li>
+<li>Penalized regression with rms::pentrace()</li>
+<li>Models other than OLS for continuous or semi-continuous Y in rms</li>
+</ol>
+<p><br></p>
+<p>I highly recommend reading Professor Harrell’s <a href="http://biostat.mc.vanderbilt.edu/wiki/Main/RmS">Regression Modeling Strategies textbook</a> (2nd edition) and course notes to learn more. Both texts provide detailed code and explanations and <strong>Chapter 6 of the textbook is devoted to R and the rms package</strong>.</p>
+<p>The data used in the examples below come from the UCI Machine Learning Repository (<a href="https://archive.ics.uci.edu/ml/datasets/Wine" class="uri">https://archive.ics.uci.edu/ml/datasets/Wine</a>) and can be accessed via the ucidata R package found on James Balamuta’s <a href="https://github.com/coatless/ucidata">github repository</a>. We will be trying to predict whether a wine is red or white from a set of 13 features. A description of the dataset from the UCI website is provided below.</p>
+<pre><code>Data Set Information:
+
+These data are the results of a chemical analysis of wines grown in the same region in Italy but derived from three different cultivars. The analysis determined the quantities of 13 constituents found in each of the three types of wines. 
+
+I think that the initial data set had around 30 variables, but for some reason I only have the 13 dimensional version. I had a list of what the 30 or so variables were, but a.) I lost it, and b.), I would not know which 13 variables are included in the set. 
+
+The attributes are (dontated by Riccardo Leardi, riclea &#39;@&#39; anchem.unige.it ) 
+1) Alcohol 
+2) Malic acid 
+3) Ash 
+4) Alcalinity of ash 
+5) Magnesium 
+6) Total phenols 
+7) Flavanoids 
+8) Nonflavanoid phenols 
+9) Proanthocyanins 
+10)Color intensity 
+11)Hue 
+12)OD280/OD315 of diluted wines 
+13)Proline 
+
+In a classification context, this is a well posed problem with &quot;well behaved&quot; class structures. A good data set for first testing of a new classifier, but not very challenging.
+
+Attribute Information:
+
+All attributes are continuous </code></pre>
+<p><br>
+<br></p>
+<div id="installing-and-loading-packages" class="section level1">
+<h1>Installing and loading packages</h1>
+<pre class="r"><code>#Install ucidata package from github 
+#devtools::install_github(&quot;coatless/ucidata&quot;)
+
+#Load packages
+library(&quot;tidyverse&quot;); packageVersion(&quot;tidyverse&quot;)</code></pre>
+<pre><code>## [1] &#39;1.2.1&#39;</code></pre>
+<pre class="r"><code>library(&quot;rms&quot;); packageVersion(&quot;rms&quot;)</code></pre>
+<pre><code>## [1] &#39;5.1.3.1&#39;</code></pre>
+<pre class="r"><code>library(&quot;ucidata&quot;); packageVersion(&quot;ucidata&quot;)</code></pre>
+<pre><code>## [1] &#39;0.0.3&#39;</code></pre>
+<pre class="r"><code>library(&quot;cowplot&quot;); packageVersion(&quot;cowplot&quot;)</code></pre>
+<pre><code>## [1] &#39;1.0.0&#39;</code></pre>
+<p><br>
+<br></p>
+</div>
+<div id="loading-example-dataset" class="section level1">
+<h1>Loading example dataset</h1>
+<p>Now that the ucidata package is loaded, we can call the wine data set using the base R function data(). We will also create a binary indicator for red_wine that will serve as our outcome variable where “red wine” == 1 and “white wine” == 0. The variable “color” is dropped from the data.frame using dplyr::select().</p>
+<pre class="r"><code>#Load wine data
+data(wine)
+
+#Recode outcome
+mydata &lt;- wine %&gt;%
+  dplyr::mutate(red_wine = ifelse(color == &quot;Red&quot;, 1, 0)) %&gt;%
+  dplyr::select(-color)  </code></pre>
+<p><br>
+<br></p>
+</div>
+<div id="tip-1.-examining-your-data-with-hmisc" class="section level1">
+<h1>Tip 1. Examining your data with Hmisc</h1>
+<p>The Hmisc package has some excellent functions to help you understand your data in terms of the distribution of variables, levels of categorical variables, number of missing values, etc. It also has some very useful commands to help visualize this information. Below are a few of the functions I use most often.</p>
+<p><br></p>
+<div id="hmiscdescribe" class="section level2">
+<h2>Hmisc::describe()</h2>
+<p><em>Describe</em> is a very handy function that allows one to…as you might expect…describe a data.frame. It will provide information on the count, number of missing values, and distinct values, as well as describe and plot the distribution of continuous values. For categorical variables the number of levels and counts are also provided. I find myself using the function as a first pass to look for implausible values in a data.frame, get a feel for the extent of missing data, and to quickly access specific quantiles for a set of predictors. The code below will generate and plot this information. The html options are provided to improve the formatting.</p>
+<pre class="r"><code>d &lt;- Hmisc::describe(mydata)
+html(d, size = 80, scroll = TRUE)</code></pre>
+<div style="width: 100ex; overflow: auto; height: 25ex;"> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<script type="text/javascript">
+<!--
+    function expand_collapse(id) {
+       var e = document.getElementById(id);
+       var f = document.getElementById(id+"_earrows");
+       if(e.style.display == 'none'){
+          e.style.display = 'block';
+          f.innerHTML = '&#9650';
+       }
+       else {
+          e.style.display = 'none';
+          f.innerHTML = '&#9660';
+       }
+    }
+//-->
+</script>
+<style>
+.earrows {color:silver;font-size:11px;}
+
+fcap {
+ font-family: Verdana;
+ font-size: 12px;
+ color: MidnightBlue
+ }
+
+smg {
+ font-family: Verdana;
+ font-size: 10px;
+ color: &#808080;
+}
+
+hr.thinhr { margin-top: 0.15em; margin-bottom: 0.15em; }
+
+span.xscript {
+position: relative;
+}
+span.xscript sub {
+position: absolute;
+left: 0.1em;
+bottom: -1ex;
+}
+</style>
+ <font color="MidnightBlue"><div align=center><span style="font-weight:bold">mydata <br><br> 13  Variables   6497  Observations</span></div></font> <hr class="thinhr"> <span style="font-weight:bold">fixed_acidity</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable441687 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable441687 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable441687 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable441687">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>106</td><td>0.999</td><td>7.215</td><td>1.32</td><td>5.7</td><td>6.0</td><td>6.4</td><td>7.0</td><td>7.7</td><td>8.8</td><td>9.8</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> :  3.8  3.9  4.2  4.4  4.5 ,  <font color="MidnightBlue">highest</font>: 14.3 15.0 15.5 15.6 15.9</span> <hr class="thinhr"> <span style="font-weight:bold">volatile_acidity</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable354119 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable354119 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable354119 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable354119">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>187</td><td>0.999</td><td>0.3397</td><td>0.1716</td><td>0.16</td><td>0.18</td><td>0.23</td><td>0.29</td><td>0.40</td><td>0.59</td><td>0.67</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> : 0.080 0.085 0.090 0.100 0.105 ,  <font color="MidnightBlue">highest</font>: 1.180 1.185 1.240 1.330 1.580</span> <hr class="thinhr"> <span style="font-weight:bold">citric_acid</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable969301 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable969301 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable969301 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable969301">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>89</td><td>0.999</td><td>0.3186</td><td>0.1571</td><td>0.05</td><td>0.14</td><td>0.25</td><td>0.31</td><td>0.39</td><td>0.49</td><td>0.56</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> : 0.00 0.01 0.02 0.03 0.04 ,  <font color="MidnightBlue">highest</font>: 0.91 0.99 1.00 1.23 1.66</span> <hr class="thinhr"> <span style="font-weight:bold">residual_sugar</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable478822 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable478822 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable478822 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable478822">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>316</td><td>1</td><td>5.443</td><td>4.958</td><td> 1.2</td><td> 1.3</td><td> 1.8</td><td> 3.0</td><td> 8.1</td><td>13.0</td><td>15.0</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> :  0.60  0.70  0.80  0.90  0.95 ,  <font color="MidnightBlue">highest</font>: 22.60 23.50 26.05 31.60 65.80</span> <hr class="thinhr"> <span style="font-weight:bold">chlorides</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable528091 {
+ border: none;
+ font-size: 70%;
+ }
+ .hmisctable528091 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable528091 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable528091">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>214</td><td>1</td><td>0.05603</td><td>0.02869</td><td>0.028</td><td>0.031</td><td>0.038</td><td>0.047</td><td>0.065</td><td>0.086</td><td>0.102</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> : 0.009 0.012 0.013 0.014 0.015 ,  <font color="MidnightBlue">highest</font>: 0.422 0.464 0.467 0.610 0.611</span> <hr class="thinhr"> <span style="font-weight:bold">free_sulfur_dioxide</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable322609 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable322609 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable322609 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable322609">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>135</td><td>1</td><td>30.53</td><td>19.51</td><td> 6</td><td> 9</td><td>17</td><td>29</td><td>41</td><td>54</td><td>61</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> :   1.0   2.0   3.0   4.0   5.0 ,  <font color="MidnightBlue">highest</font>: 128.0 131.0 138.5 146.5 289.0</span> <hr class="thinhr"> <span style="font-weight:bold">total_sulfur_dioxide</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable998318 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable998318 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable998318 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable998318">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>276</td><td>1</td><td>115.7</td><td>64.31</td><td> 19</td><td> 30</td><td> 77</td><td>118</td><td>156</td><td>188</td><td>206</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> :   6.0   7.0   8.0   9.0  10.0 ,  <font color="MidnightBlue">highest</font>: 307.5 313.0 344.0 366.5 440.0</span> <hr class="thinhr"> <span style="font-weight:bold">density</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable340134 {
+ border: none;
+ font-size: 70%;
+ }
+ .hmisctable340134 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable340134 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable340134">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>998</td><td>1</td><td>0.9947</td><td>0.003388</td><td>0.9899</td><td>0.9907</td><td>0.9923</td><td>0.9949</td><td>0.9970</td><td>0.9984</td><td>0.9994</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> : 0.98711 0.98713 0.98722 0.98740 0.98742 ,  <font color="MidnightBlue">highest</font>: 1.00315 1.00320 1.00369 1.01030 1.03898</span> <hr class="thinhr"> <span style="font-weight:bold">pH</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable777493 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable777493 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable777493 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable777493">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>108</td><td>1</td><td>3.219</td><td>0.1802</td><td>2.97</td><td>3.02</td><td>3.11</td><td>3.21</td><td>3.32</td><td>3.42</td><td>3.50</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> : 2.72 2.74 2.77 2.79 2.80 ,  <font color="MidnightBlue">highest</font>: 3.81 3.82 3.85 3.90 4.01</span> <hr class="thinhr"> <span style="font-weight:bold">sulphates</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable604071 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable604071 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable604071 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable604071">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>111</td><td>0.999</td><td>0.5313</td><td>0.1556</td><td>0.35</td><td>0.37</td><td>0.43</td><td>0.51</td><td>0.60</td><td>0.72</td><td>0.79</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> : 0.22 0.23 0.25 0.26 0.27 ,  <font color="MidnightBlue">highest</font>: 1.61 1.62 1.95 1.98 2.00</span> <hr class="thinhr"> <span style="font-weight:bold">alcohol</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+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" alt="image" /></div> <style>
+ .hmisctable112360 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable112360 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable112360 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable112360">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th><th>.05</th><th>.10</th><th>.25</th><th>.50</th><th>.75</th><th>.90</th><th>.95</th></tr>
+ <tr><td>6497</td><td>0</td><td>111</td><td>0.999</td><td>10.49</td><td>1.348</td><td> 9.0</td><td> 9.1</td><td> 9.5</td><td>10.3</td><td>11.3</td><td>12.3</td><td>12.7</td></tr>
+ </table>
+ <span style="font-size: 85%;"><font color="MidnightBlue">lowest</font> :  8.00  8.40  8.50  8.60  8.70 ,  <font color="MidnightBlue">highest</font>: 13.90 14.00 14.05 14.20 14.90</span> <hr class="thinhr"> <span style="font-weight:bold">quality</span><div style='float: right; text-align: right;'><img src="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAABYAAAANCAYAAACtpZ5jAAAEGWlDQ1BrQ0dDb2xvclNwYWNlR2VuZXJpY1JHQgAAOI2NVV1oHFUUPrtzZyMkzlNsNIV0qD8NJQ2TVjShtLp/3d02bpZJNtoi6GT27s6Yyc44M7v9oU9FUHwx6psUxL+3gCAo9Q/bPrQvlQol2tQgKD60+INQ6Ium65k7M5lpurHeZe58853vnnvuuWfvBei5qliWkRQBFpquLRcy4nOHj4g9K5CEh6AXBqFXUR0rXalMAjZPC3e1W99Dwntf2dXd/p+tt0YdFSBxH2Kz5qgLiI8B8KdVy3YBevqRHz/qWh72Yui3MUDEL3q44WPXw3M+fo1pZuQs4tOIBVVTaoiXEI/MxfhGDPsxsNZfoE1q66ro5aJim3XdoLFw72H+n23BaIXzbcOnz5mfPoTvYVz7KzUl5+FRxEuqkp9G/Ajia219thzg25abkRE/BpDc3pqvphHvRFys2weqvp+krbWKIX7nhDbzLOItiM8358pTwdirqpPFnMF2xLc1WvLyOwTAibpbmvHHcvttU57y5+XqNZrLe3lE/Pq8eUj2fXKfOe3pfOjzhJYtB/yll5SDFcSDiH+hRkH25+L+sdxKEAMZahrlSX8ukqMOWy/jXW2m6M9LDBc31B9LFuv6gVKg/0Szi3KAr1kGq1GMjU/aLbnq6/lRxc4XfJ98hTargX++DbMJBSiYMIe9Ck1YAxFkKEAG3xbYaKmDDgYyFK0UGYpfoWYXG+fAPPI6tJnNwb7ClP7IyF+D+bjOtCpkhz6CFrIa/I6sFtNl8auFXGMTP34sNwI/JhkgEtmDz14ySfaRcTIBInmKPE32kxyyE2Tv+thKbEVePDfW/byMM1Kmm0XdObS7oGD/MypMXFPXrCwOtoYjyyn7BV29/MZfsVzpLDdRtuIZnbpXzvlf+ev8MvYr/Gqk4H/kV/G3csdazLuyTMPsbFhzd1UabQbjFvDRmcWJxR3zcfHkVw9GfpbJmeev9F08WW8uDkaslwX6avlWGU6NRKz0g/SHtCy9J30o/ca9zX3Kfc19zn3BXQKRO8ud477hLnAfc1/G9mrzGlrfexZ5GLdn6ZZrrEohI2wVHhZywjbhUWEy8icMCGNCUdiBlq3r+xafL549HQ5jH+an+1y+LlYBifuxAvRN/lVVVOlwlCkdVm9NOL5BE4wkQ2SMlDZU97hX86EilU/lUmkQUztTE6mx1EEPh7OmdqBtAvv8HdWpbrJS6tJj3n0CWdM6busNzRV3S9KTYhqvNiqWmuroiKgYhshMjmhTh9ptWhsF7970j/SbMrsPE1suR5z7DMC+P/Hs+y7ijrQAlhyAgccjbhjPygfeBTjzhNqy28EdkUh8C+DU9+z2v/oyeH791OncxHOs5y2AtTc7nb/f73TWPkD/qwBnjX8BoJ98VQNcC+8AAAEOSURBVDgRvZE/rkVAFMa/d3MTK5DYg01obMAK7EOvpNKoJBQaNqATFQ0KjahR0BCJau6deVG8XCNyi3eS+XO+85svM2d++r4nuBGapjEqjuMbNPCUJOkWKAgC4+7yD57rtm0wTRPLsvCQS51rXJYlDMNAnueXBrwi15iQ39YfK8+Ap3ONeQfu6s+qqk7Ztm2Z3nUdRFHEuq4s5/EfJu+nnkaWZbQXJEkSVlcUhdBBYxxHous6meeZ5WfTV62o6xqe56Fpmo+LHsJXxsfhq/V/jF3XhWVZVxc5rfm+jyiK/tQesiwjTVMMw4AwDBEEAdtP08TA9wexfN930EE5qtGgDM1t24bjOGxfFAVUVcULZEyxVc9hyX0AAAAASUVORK5CYII=" alt="image" /></div> <style>
+ .hmisctable424466 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable424466 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable424466 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable424466">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Mean</th><th>Gmd</th></tr>
+ <tr><td>6497</td><td>0</td><td>7</td><td>0.877</td><td>5.818</td><td>0.9233</td></tr>
+ </table>
+ <pre style="font-size:85%;">
+ Value          3     4     5     6     7     8     9
+ Frequency     30   216  2138  2836  1079   193     5
+ Proportion 0.005 0.033 0.329 0.437 0.166 0.030 0.001
+ </pre>
+ <hr class="thinhr"> <span style="font-weight:bold">red_wine</span> <style>
+ .hmisctable250749 {
+ border: none;
+ font-size: 80%;
+ }
+ .hmisctable250749 td {
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ }
+ .hmisctable250749 th {
+ color: MidnightBlue;
+ text-align: center;
+ padding: 0 1ex 0 1ex;
+ font-weight: normal;
+ }
+ </style>
+ <table class="hmisctable250749">
+ <tr><th>n</th><th>missing</th><th>distinct</th><th>Info</th><th>Sum</th><th>Mean</th><th>Gmd</th></tr>
+ <tr><td>6497</td><td>0</td><td>2</td><td>0.557</td><td>1599</td><td>0.2461</td><td>0.3711</td></tr>
+ </table>
+ <hr class="thinhr"> </div>
+<p><br></p>
+<p>As you can see, much useful descriptive information is printed to the console. You can plot the histograms for these predictors separately using the plotting commands below.</p>
+<pre class="r"><code>p &lt;- plot(d)
+p$Continuous</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/plot_describe-1.png" width="672" /></p>
+<p><br>
+<br></p>
+</div>
+<div id="hmiscsummarym-to-obtain-a-table-of-predictors-stratified-by-outcome" class="section level2">
+<h2>Hmisc::summaryM() to obtain a table of predictors stratified by outcome</h2>
+<p>Hmisc::summaryM() summarizes the variables listed in an S formula, computing descriptive statistics and optionally statistical tests for group differences. This function is typically used when there are multiple left-hand-side variables that are independently against by groups marked by a single right-hand-side variable (<em>from help</em>).</p>
+<p>I find summaryM can provide a great “head start” to generating a “Table 1” for a manuscript. However, one should think about the information that is being conveyed when providing a table of unconditional tests via the test = TRUE option. Differences between the unconditional and the conditional estimates can be a source of confusion (or at least may end up requiring a longer than needed explanation) when both are presented. Moreover, one should think hard about whether or not to include formal tests if the study was not specifically designed to test these factors (and whether the p-values actually provide useful information). I am including the test = TRUE option here just to highlight this functionality.</p>
+<pre class="r"><code>s &lt;- Hmisc::summaryM(fixed_acidity + volatile_acidity + citric_acid + residual_sugar + chlorides + free_sulfur_dioxide + 
+              total_sulfur_dioxide+ density + pH + sulphates + alcohol + quality  ~ red_wine, data = mydata,
+              overall = TRUE, test = TRUE, continuous = 5)
+ 
+
+html(s, caption=&#39;Predictors according to wine type&#39;,
+     exclude1 = TRUE, npct = &#39;both&#39;, digits = 2,
+     prmsd = TRUE, brmsd = TRUE, msdsize = mu$smaller2)</code></pre>
+<table class='gmisc_table' style='border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;' >
+<thead>
+<tr><td colspan='5' style='text-align: left;'>
+Predictors according to wine type.  </td></tr>
+<tr>
+<th style='font-weight: 900; border-bottom: 1px solid grey; border-top: 2px solid grey; width:17ex; text-align: center;'></th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>0<br><i>N=4898</i></th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>1<br><i>N=1599</i></th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Combined<br><i>N=6497</i></th>
+<th style='border-bottom: 1px solid grey; border-top: 2px solid grey; text-align: center;'>Test Statistic<br></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style='width:17ex; text-align: left;'>fixed_acidity</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>6.30 6.80 7.30<br>6.85 ± 0.84</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>7.10 7.90 9.20<br>8.32 ± 1.74</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>6.40 7.00 7.70<br>7.22 ± 1.30</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=1421, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>volatile_acidity</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.21 0.26 0.32<br>0.28 ± 0.10</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.39 0.52 0.64<br>0.53 ± 0.18</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.23 0.29 0.40<br>0.34 ± 0.16</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=3637, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>citric_acid</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.27 0.32 0.39<br>0.33 ± 0.12</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.09 0.26 0.42<br>0.27 ± 0.19</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.25 0.31 0.39<br>0.32 ± 0.15</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=173, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>residual_sugar</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>1.7 5.2 9.9<br>6.4 ± 5.1</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>1.9 2.2 2.6<br>2.5 ± 1.4</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>1.8 3.0 8.1<br>5.4 ± 4.8</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=458, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>chlorides</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.036 0.043 0.050<br>0.046 ± 0.022</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.070 0.079 0.090<br>0.087 ± 0.047</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.038 0.047 0.065<br>0.056 ± 0.035</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=5156, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>free_sulfur_dioxide</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>23 34 46<br>35 ± 17</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'> 7 14 21<br>16 ± 10</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>17 29 41<br>31 ± 18</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=2409, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>total_sulfur_dioxide</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>108 134 167<br>138 ±  42</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'> 22  38  62<br> 46 ±  33</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'> 77 118 156<br>116 ±  57</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=5473, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>density</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.9917 0.9937 0.9961<br>0.9940 ± 0.0030</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.9956 0.9968 0.9978<br>0.9967 ± 0.0019</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.9923 0.9949 0.9970<br>0.9947 ± 0.0030</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=1300, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>pH</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>3.09 3.18 3.28<br>3.19 ± 0.15</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>3.21 3.31 3.40<br>3.31 ± 0.15</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>3.11 3.21 3.32<br>3.22 ± 0.16</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=829, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>sulphates</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.41 0.47 0.55<br>0.49 ± 0.11</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.55 0.62 0.73<br>0.66 ± 0.17</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'>0.43 0.51 0.60<br>0.53 ± 0.15</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=2101, P<0.001</td>
+</tr>
+<tr>
+<td style='width:17ex; text-align: left;'>alcohol</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'> 9.5 10.4 11.4<br>10.5 ±  1.2</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'> 9.5 10.2 11.1<br>10.4 ±  1.1</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'> 9.5 10.3 11.3<br>10.5 ±  1.2</td>
+<td style='padding: 0 7px 0 7px; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=1.8, P=0.18</td>
+</tr>
+<tr>
+<td style='width:17ex; border-bottom: 2px solid grey; text-align: left;'>quality</td>
+<td style='padding: 0 7px 0 7px; border-bottom: 2px solid grey; text-align: center;'>5.00 6.00 6.00<br>5.88 ± 0.89</td>
+<td style='padding: 0 7px 0 7px; border-bottom: 2px solid grey; text-align: center;'>5.00 6.00 6.00<br>5.64 ± 0.81</td>
+<td style='padding: 0 7px 0 7px; border-bottom: 2px solid grey; text-align: center;'>5.00 6.00 6.00<br>5.82 ± 0.87</td>
+<td style='padding: 0 7px 0 7px; border-bottom: 2px solid grey; text-align: center;'><i>F</i><sub><span style="font-size: 80%;">1 6495</span></sub>=100, P<0.001</td>
+</tr>
+</tbody>
+<tfoot><tr><td colspan='5'>
+<span style="font-size: 80%;"><i>a</i></span> <i>b</i> <span style="font-size: 80%;"><i>c</i></span> represent the lower quartile <i>a</i>, the median <i>b</i>, and the upper quartile <i>c</i> for continuous variables. <i>x ± s</i> represents <span style="text-decoration: overline">X</span> ± 1 SD. <br> Test used: Wilcoxon test .</td></tr></tfoot>
+</table>
+<p><br>
+<br></p>
+</div>
+<div id="spike-histograms-with-hmischistspikeg-ggplot-and-cowplot" class="section level2">
+<h2>Spike histograms with Hmisc::histSpikeg(), ggplot, and cowplot</h2>
+<p>Dr. Harrell’s histSpikeg function provides a very powerful approach to visualize the univariable association between a continuous predictor and binary outcome. It does this by binning the continuous x variable into equal-width bins and then computing and plotting the frequency counts of Y within each bin. The function then displays the proportions as a vertical histogram with a lowess curve fit to the plot. histSpikeg allows this functionality to be added as a ggplot layer.</p>
+<p>Here I am combing the plots into a single figure using <a href="https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html">Claus Wilke’s cowplot package plot_grid()</a> function.</p>
+<pre class="r"><code>dd &lt;- datadist(mydata)
+options(datadist = &quot;dd&quot;)
+
+a &lt;- ggplot(mydata, aes(x = alcohol, y = red_wine)) +
+  Hmisc::histSpikeg(red_wine ~ alcohol, lowess = TRUE, data = mydata) +
+  labs(x = &quot;\nAlcohol Content&quot;, y = &quot;Probability(Red Wine)\n&quot;)
+
+b &lt;- ggplot(mydata, aes(x = citric_acid, y = red_wine)) +
+    Hmisc::histSpikeg(red_wine ~ citric_acid, lowess = TRUE, data = mydata) +
+    labs(x = &quot;\nCitric Acid&quot;, y = &quot;Probability(Red Wine)\n&quot;)
+
+c &lt;- ggplot(mydata, aes(x = sulphates, y = red_wine)) +
+    Hmisc::histSpikeg(red_wine ~ sulphates, lowess = TRUE, data = mydata) +
+    labs(x = &quot;\nSulphates&quot;, y = &quot;Probability(Red Wine)\n&quot;)
+
+cowplot::plot_grid(a, b, c,  nrow = 1, ncol = 3, scale = .9, labels = &quot;AUTO&quot;)</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/spike_histograms-1.png" width="1152" /></p>
+<p><br></p>
+<p>These plots suggest that allowing for complexity/flexibly of the right hand side of the linear model equation may provide improved performance. However, Dr. Harrell has argued (convincingly IMO) that including non-linear terms for continuous predictors should typically be default practice since 1.) truly linear functional forms are probably the expectation more so than the rule (at least for most biomedical phenomena) and 2.) you will likely have more success and “miss small” when including non-linear terms if the true association happens to be linear than if the true association is highly non-linear and one models the association with a simple linear term (i.e. fits a linear term to a u-shaped association diminishing model performance). The cost, of course, is a few model degrees of freedom and the possibility for overfitting…which we will come back to latter.</p>
+<p><br>
+<br></p>
+</div>
+<div id="visualizing-patterns-of-missing-data-with-hmiscnaplot-and-hmiscnaclus" class="section level2">
+<h2>Visualizing patterns of missing data with Hmisc::naplot and Hmisc::naclus</h2>
+<p>While there are no missing values in these data, the Hmisc package has several nice features to assess and visualize the extent of missing data and patterns of missing data among variables. Here we will use the dplyr::mutate() function to set some of the values to missing. Then the naplot function is used to plot the proportion of missing values for each variable in the dataset and the naclus function is used to assess patterns of “missingness” among variables. This information can be very helpful to understand why values might be missing and to inform imputation strategies.</p>
+<p>While there is no need to impute missing values in this example, the <a href="https://www.rdocumentation.org/packages/Hmisc/versions/4.2-0/topics/aregImpute">Hmisc:: aregImpute function</a> provides a rigorous approach to handling missing data via multiple imputation using additive regression with various options for bootstrapping, predictive mean matching, etc. Multiple imputations can then be properly combined using Rubin’s rules via the fit.mult.impute function. This function can also be used with output from Stef van Buuren’s <a href="https://stefvanbuuren.name/mice/">MICE package</a>.</p>
+<pre class="r"><code>missing_df &lt;- mydata %&gt;%
+  dplyr::mutate(fixed_acidity = ifelse(row_number() %in% c(1:100), NA, fixed_acidity),
+         volatile_acidity = ifelse(row_number() %in% c(1:200), NA, volatile_acidity),
+         citric_acid = ifelse(row_number() %in% c(50:400), NA, citric_acid),
+         residual_sugar = ifelse(row_number() %in% c(1000:1050), NA, residual_sugar),
+         chlorides = ifelse(row_number() %in% c(1000:1100), NA, chlorides))
+
+
+par(mfrow = c(1,2))
+na_patterns &lt;- Hmisc::naclus(missing_df)
+Hmisc::naplot(na_patterns, &#39;na per var&#39;)
+plot(na_patterns)</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/missing-1.png" width="1152" /></p>
+<p><br>
+<br></p>
+</div>
+</div>
+<div id="tip-2.-regression-modeling-allowing-for-complexity-with-rms" class="section level1">
+<h1>Tip 2. Regression modeling allowing for complexity with rms</h1>
+<p><br></p>
+<p>The Hmisc and rms packages were recommend to me some time ago when I was looking for better approaches (than say base R functions…as good as they are) to incorporate non-linear terms and interactions into a generalized linear model framework. <strong>The rms package makes adding such complexity extremely accessible</strong> with reasonable defaults. Professor Harrell discusses the use of restricted cubic spline terms (natural splines) to relax the assumption of linearity for continuous predictors, as well as some of the advantages of constraining the spline function to be linear in the tails in Chapter 2 of the second edition of his <a href="https://www.springer.com/us/book/9783319194240#aboutBook">Regression Modeling Stratigies</a> textbook. He also provides a detailed description regarding the number and placement of knots that I found quite informative. I typically stick with the recommend default knot placement unless I have good reason to do otherwise, but alternative placement can be easily accommodated.</p>
+<p>The rms package also eases the programming required to fit and test interaction terms (using anova.rms) and recognizes syntax of the forms below which were taken from <a href="https://couthcommander.github.io/rworkshop/workshop.html">Cole Beck’s rms tutorial</a>:</p>
+<ul>
+<li>y ~ a:b, : indicates the interaction of a and b</li>
+<li>y ~ a*b, equivalent to y ~ a+b+a:b</li>
+<li>y ~ (a+b)^2, equivalent to y ~ (a+b)*(a+b)</li>
+<li>and the restricted interaction term %ia% that for non-linear predictors is not doubly nonlinear in the interaction</li>
+</ul>
+<p>The code below will fit an additive model to the full set of predictors allowing for flexibility using restricted cubic splines fit via the rms::rcs() function.</p>
+<p><br></p>
+<pre class="r"><code>m0 &lt;- lrm(red_wine ~ rcs(fixed_acidity, 4) + rcs(volatile_acidity, 4) + rcs(citric_acid, 4) + rcs(residual_sugar, 4) + 
+          rcs(chlorides, 4) + rcs(free_sulfur_dioxide, 4) + rcs(total_sulfur_dioxide, 4) + rcs(density, 4) + rcs(pH, 4) + 
+          rcs(sulphates, 4) + rcs(alcohol, 4) + rcs(quality, 3),
+          data = mydata, x = TRUE, y = TRUE)
+print(m0, coef = FALSE)</code></pre>
+<pre><code>## Logistic Regression Model
+##  
+##  lrm(formula = red_wine ~ rcs(fixed_acidity, 4) + rcs(volatile_acidity, 
+##      4) + rcs(citric_acid, 4) + rcs(residual_sugar, 4) + rcs(chlorides, 
+##      4) + rcs(free_sulfur_dioxide, 4) + rcs(total_sulfur_dioxide, 
+##      4) + rcs(density, 4) + rcs(pH, 4) + rcs(sulphates, 4) + rcs(alcohol, 
+##      4) + rcs(quality, 3), data = mydata, x = TRUE, y = TRUE)
+##  
+##                        Model Likelihood     Discrimination    Rank Discrim.    
+##                           Ratio Test           Indexes           Indexes       
+##  Obs          6497    LR chi2    7008.47    R2       0.981    C       0.999    
+##   0           4898    d.f.            35    g        8.879    Dxy     0.997    
+##   1           1599    Pr(&gt; chi2) &lt;0.0001    gr    7178.012    gamma   0.998    
+##  max |deriv| 1e-05                          gp       0.371    tau-a   0.370    
+##                                             Brier    0.004</code></pre>
+<pre class="r"><code>plot(anova(m0))</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/wald_check-1.png" width="672" /></p>
+<p><strong>So…it looks like we can rather easily predict the type of wine from this set of features!</strong> If I would have known this, I might have selected a more difficult example problem. <em>I suppose if I did not know at least this much, my this a second career as a sommelier is probably out of the question at this point!</em></p>
+<p>Our next steps would typically be to validate the model and assess how well it is calibrated over the range of predictions, but here I want to continue an example that is a bit more similar to what I commonly see in practice (i.e. we have a set of features with moderate predictive performance). I also want to trim down the number of predictors to highlight some of the plotting functions.</p>
+<p>Therefore, I will proceed using only two predictors that have relatively small conditional chi-square values (since even the top few predictors have excellent performance) to show some of the key functionality. The first model is a flexible additive model allowing for 3 knots for each predictor.</p>
+<pre class="r"><code>m2 &lt;- lrm(red_wine ~ rcs(pH, 3) + rcs(sulphates, 3), data = mydata, x = TRUE, y = TRUE)
+print(m2)</code></pre>
+<pre><code>## Logistic Regression Model
+##  
+##  lrm(formula = red_wine ~ rcs(pH, 3) + rcs(sulphates, 3), data = mydata, 
+##      x = TRUE, y = TRUE)
+##  
+##                        Model Likelihood     Discrimination    Rank Discrim.    
+##                           Ratio Test           Indexes           Indexes       
+##  Obs          6497    LR chi2    2294.01    R2       0.442    C       0.866    
+##   0           4898    d.f.             4    g        2.415    Dxy     0.731    
+##   1           1599    Pr(&gt; chi2) &lt;0.0001    gr      11.186    gamma   0.731    
+##  max |deriv| 7e-07                          gp       0.271    tau-a   0.271    
+##                                             Brier    0.125                     
+##  
+##             Coef     S.E.   Wald Z Pr(&gt;|Z|)
+##  Intercept  -40.0731 2.4341 -16.46 &lt;0.0001 
+##  pH           8.4567 0.7536  11.22 &lt;0.0001 
+##  pH&#39;         -4.3193 0.7323  -5.90 &lt;0.0001 
+##  sulphates   23.5236 1.3365  17.60 &lt;0.0001 
+##  sulphates&#39; -15.9641 1.3353 -11.96 &lt;0.0001 
+## </code></pre>
+<pre class="r"><code>anova(m2)</code></pre>
+<pre><code>##                 Wald Statistics          Response: red_wine 
+## 
+##  Factor          Chi-Square d.f. P     
+##  pH               347.99    2    &lt;.0001
+##   Nonlinear        34.79    1    &lt;.0001
+##  sulphates        920.43    2    &lt;.0001
+##   Nonlinear       142.93    1    &lt;.0001
+##  TOTAL NONLINEAR  185.52    2    &lt;.0001
+##  TOTAL           1205.84    4    &lt;.0001</code></pre>
+<pre class="r"><code>p1 &lt;- ggplot(Predict(m2, pH))
+p2 &lt;- ggplot(Predict(m2, sulphates))
+p3 &lt;- ggplot(Predict(m2, pH, fun = plogis))
+p4 &lt;- ggplot(Predict(m2, sulphates, fun = plogis))
+cowplot::plot_grid(p1, p2, p3, p4, nrow = 2, ncol = 2, scale = .9)</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/m2-1.png" width="672" /></p>
+<p>The Brier score and C-statistic suggest possible moderate predictive performance Printing the model also provides information and tests for the coefficients and non-linear terms (which may or may not be informative depending on your goals). The <strong>anova.rms function is quite impressive</strong> and automatically tests the most meaningful hypotheses in a design including Wald tests for the non-linear terms, and interactions if they were included (as we will see below), as well as chunk tests for any set of terms of interest. Here is a link with an example of the chunk test on <a href="https://stats.stackexchange.com/questions/27429/what-are-chunk-tests">stackexchange</a>.</p>
+<p>The Predict function selects plausible values to provide predictions over and can be plotted using ggplot. By default, the predictions for rms::lrm() are returned on the log-odds scale. If we provide a function to the fun = option, we can obtain the predictions on an alternative scale. Here we use the plogis function to return the predicted probabilities. These are calculated at the median value for continuous variables and at the most common level for categorical variables by default (but can be changed).</p>
+<p>Below I use the ^2 operator to include all two-way interactions in the model (in this simple example this is a bit of overkill and other choices of syntax used). The <strong>rms::bplot() function is very cool</strong> and allows one to visualize the two-way interaction. The last line of code highlights how specific values of a feature can be provided to the rms::Predict () function. This is incredibly useful when you want to examine how multiple factors are operating. Dr. Harrell provides many example of this in his RMS textbook.</p>
+<pre class="r"><code>m3 &lt;- lrm(red_wine ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, data = mydata, x = TRUE, y = TRUE)
+print(m3, coef = FALSE)</code></pre>
+<pre><code>## Logistic Regression Model
+##  
+##  lrm(formula = red_wine ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, 
+##      data = mydata, x = TRUE, y = TRUE)
+##  
+##                        Model Likelihood     Discrimination    Rank Discrim.    
+##                           Ratio Test           Indexes           Indexes       
+##  Obs          6497    LR chi2    2333.97    R2       0.449    C       0.867    
+##   0           4898    d.f.             8    g        2.579    Dxy     0.734    
+##   1           1599    Pr(&gt; chi2) &lt;0.0001    gr      13.181    gamma   0.734    
+##  max |deriv| 2e-09                          gp       0.272    tau-a   0.272    
+##                                             Brier    0.123</code></pre>
+<pre class="r"><code>anova(m3)</code></pre>
+<pre><code>##                 Wald Statistics          Response: red_wine 
+## 
+##  Factor                                        Chi-Square d.f. P     
+##  pH  (Factor+Higher Order Factors)              355.42    6    &lt;.0001
+##   All Interactions                               35.00    4    &lt;.0001
+##   Nonlinear (Factor+Higher Order Factors)        46.09    3    &lt;.0001
+##  sulphates  (Factor+Higher Order Factors)       887.41    6    &lt;.0001
+##   All Interactions                               35.00    4    &lt;.0001
+##   Nonlinear (Factor+Higher Order Factors)       161.97    3    &lt;.0001
+##  pH * sulphates  (Factor+Higher Order Factors)   35.00    4    &lt;.0001
+##   Nonlinear                                       6.41    3    0.0933
+##   Nonlinear Interaction : f(A,B) vs. AB           6.41    3    0.0933
+##   f(A,B) vs. Af(B) + Bg(A)                        0.06    1    0.8011
+##   Nonlinear Interaction in pH vs. Af(B)           2.36    2    0.3073
+##   Nonlinear Interaction in sulphates vs. Bg(A)    2.94    2    0.2297
+##  TOTAL NONLINEAR                                204.16    5    &lt;.0001
+##  TOTAL NONLINEAR + INTERACTION                  214.89    6    &lt;.0001
+##  TOTAL                                         1159.86    8    &lt;.0001</code></pre>
+<pre class="r"><code>pred_intx &lt;- Predict(m3, &#39;pH&#39;,&#39;sulphates&#39;, fun = plogis, np = 75)
+bplot(pred_intx, yhat ~ pH + sulphates, lfun = wireframe,
+      ylab = &quot;Sulphates&quot;, zlab = &quot;Pr(Red Wine)\n&quot;)</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/m3-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(Predict(m2, sulphates, pH = c(3.0, 3.2, 3.4), fun = plogis))</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/m3-2.png" width="672" /></p>
+<p><br></p>
+<p>The inclusion of the interaction does not look to add much in term of the absolute or rank-based discrimination. However, this example highlights the various types of tests that anova.rms performs by default. It also allows us to see the response profile surface returned by bplot().</p>
+<p>Let’s now go ahead and fit the restricted interaction just for instructive purposes.</p>
+<pre class="r"><code>#%ia% is restricted interaction - not doubly nonlinear
+m4 &lt;- lrm(red_wine ~ rcs(pH, 3) + rcs(sulphates, 3) + pH %ia% sulphates, data = mydata, x = TRUE, y = TRUE)  
+print(m4, coef = FALSE)</code></pre>
+<pre><code>## Logistic Regression Model
+##  
+##  lrm(formula = red_wine ~ rcs(pH, 3) + rcs(sulphates, 3) + pH %ia% 
+##      sulphates, data = mydata, x = TRUE, y = TRUE)
+##  
+##                        Model Likelihood     Discrimination    Rank Discrim.    
+##                           Ratio Test           Indexes           Indexes       
+##  Obs          6497    LR chi2    2327.12    R2       0.448    C       0.866    
+##   0           4898    d.f.             5    g        2.657    Dxy     0.733    
+##   1           1599    Pr(&gt; chi2) &lt;0.0001    gr      14.252    gamma   0.733    
+##  max |deriv| 2e-11                          gp       0.272    tau-a   0.272    
+##                                             Brier    0.124</code></pre>
+<pre class="r"><code>anova(m4)</code></pre>
+<pre><code>##                 Wald Statistics          Response: red_wine 
+## 
+##  Factor                                        Chi-Square d.f. P     
+##  pH  (Factor+Higher Order Factors)              362.84    3    &lt;.0001
+##   All Interactions                               32.25    1    &lt;.0001
+##   Nonlinear                                      44.67    1    &lt;.0001
+##  sulphates  (Factor+Higher Order Factors)       883.81    3    &lt;.0001
+##   All Interactions                               32.25    1    &lt;.0001
+##   Nonlinear                                     154.96    1    &lt;.0001
+##  pH * sulphates  (Factor+Higher Order Factors)   32.25    1    &lt;.0001
+##  TOTAL NONLINEAR                                198.98    2    &lt;.0001
+##  TOTAL NONLINEAR + INTERACTION                  205.24    3    &lt;.0001
+##  TOTAL                                         1137.05    5    &lt;.0001</code></pre>
+<pre class="r"><code>pred_intx_r &lt;- Predict(m4, &#39;pH&#39;,&#39;sulphates&#39;, fun = plogis, np = 75)
+bplot(pred_intx_r, yhat ~ pH + sulphates, lfun = wireframe,
+      ylab = &quot;Sulphates&quot;, zlab = &quot;Pr(Red Wine)\n&quot;)</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/m4-1.png" width="672" /></p>
+<p><br></p>
+<p>Here we can see that the results are generally unchanged; however, the restricted interaction and test is for 1 d.f.; whereas, the interaction for the cross-product term with 3 knots in each of the predictors requires 4 d.f.</p>
+<p>The summary.rms() function can be used to obtain the log-odds and exponentiated odds ratios for each predictor. The interquartile odds ratios are provided by default. These can be easily changed, and more interesting or complex associations tested.</p>
+<p>As with other GLMs, the rms fitted values of the rms::lrm() object can be obtained for all observations using the predict function.</p>
+<pre class="r"><code>summary(m4)</code></pre>
+<pre><code>##              Effects              Response : red_wine 
+## 
+##  Factor      Low  High Diff. Effect  S.E.     Lower 0.95 Upper 0.95
+##  pH          3.11 3.32 0.21   1.4116 0.084427  1.2461     1.5770   
+##   Odds Ratio 3.11 3.32 0.21   4.1024       NA  3.4767     4.8406   
+##  sulphates   0.43 0.60 0.17   2.7986 0.124910  2.5538     3.0434   
+##   Odds Ratio 0.43 0.60 0.17  16.4220       NA 12.8560    20.9770   
+## 
+## Adjusted to: pH=3.21 sulphates=0.51</code></pre>
+<pre class="r"><code>summary(m4, pH = c(2.97, 3.50)) #contrast of 5th verus 95th %tile</code></pre>
+<pre><code>##              Effects              Response : red_wine 
+## 
+##  Factor      Low  High Diff. Effect  S.E.    Lower 0.95 Upper 0.95
+##  pH          2.97 3.5  0.53   3.4147 0.19978  3.0231     3.8062   
+##   Odds Ratio 2.97 3.5  0.53  30.4070      NA 20.5550    44.9800   
+##  sulphates   0.43 0.6  0.17   2.7986 0.12491  2.5538     3.0434   
+##   Odds Ratio 0.43 0.6  0.17  16.4220      NA 12.8560    20.9770   
+## 
+## Adjusted to: pH=3.21 sulphates=0.51</code></pre>
+<pre class="r"><code>r &lt;- mydata
+r$fitted &lt;- predict(m4, type = &quot;fitted&quot;)
+head(r$fitted)</code></pre>
+<pre><code>## [1] 0.5605529 0.5164138 0.5470583 0.2846203 0.5605529 0.5605529</code></pre>
+<p><br>
+<br></p>
+</div>
+<div id="tip-3.-validating-fitted-models-with-rmsvalidate-and-rmscalibrate" class="section level1">
+<h1>Tip 3. Validating fitted models with rms::validate() and rms:calibrate()</h1>
+<p><br></p>
+<p>In Chapter 5 of the RMS textbook, the bootstrap procure is advocated for obtaining nearly unbiased estimates of a model’s future performance using resampling. The rms::validate() function implements this procedure to return bias-corrected indexes that are specific to each type of model. <strong>There are many indices of performance that are returned!</strong> Use ?validate.lrm to get further information on each metric. The steps performed to obtain optimism correct estimates based on bootstrap resampling are:</p>
+<ul>
+<li>Estimate model performance in the original sample of size n</li>
+<li>Draw a bootstrap sample of the same size n and fit the model to the bootstrap sample</li>
+<li>Apply the model obtained in the bootstrap sample to the original sample</li>
+<li>Subtract the accuracy measure found in the bootstrap sample from the accuracy measure in the original sample - this is the estimate of optimism (i.e. overfitting)</li>
+<li>Repeat the process many times and average over the repeats to obtain a final estimate of optimism for each measure</li>
+<li>Subtract that value from the observed/apparent accuracy measure to get the optimism corrected estimate</li>
+</ul>
+<p>Alternative approaches such as cross-validation or .632 resampling can also be implemented. Below is an example using 200 bootstrap resamples. The second line of code computes the C-statistic (a.k.a. area under the ROC curve) from Somer’s D. <em>There is a lot going on here…but, the validate function abstracts most of it away!</em></p>
+<p><br></p>
+<pre class="r"><code>(val &lt;- validate(m4, B = 200))</code></pre>
+<pre><code>##           index.orig training    test optimism index.corrected   n
+## Dxy           0.7329   0.7341  0.7325   0.0016          0.7313 200
+## R2            0.4477   0.4493  0.4471   0.0022          0.4455 200
+## Intercept     0.0000   0.0000 -0.0023   0.0023         -0.0023 200
+## Slope         1.0000   1.0000  0.9941   0.0059          0.9941 200
+## Emax          0.0000   0.0000  0.0017   0.0017          0.0017 200
+## D             0.3580   0.3595  0.3574   0.0021          0.3559 200
+## U            -0.0003  -0.0003  0.0000  -0.0003          0.0000 200
+## Q             0.3583   0.3599  0.3574   0.0024          0.3559 200
+## B             0.1237   0.1233  0.1238  -0.0005          0.1242 200
+## g             2.6569   2.6652  2.6483   0.0170          2.6400 200
+## gp            0.2719   0.2722  0.2717   0.0005          0.2714 200</code></pre>
+<pre class="r"><code>(c_opt_corr &lt;- 0.5 * (val[1, 5] + 1))</code></pre>
+<pre><code>## [1] 0.8656726</code></pre>
+<p><br></p>
+<p>Here we see little evidence of overfitting. This would be expected given the large sample size and small model d.f. However, the difference between the apparent and optimism-corrected estimates can be quite large when estimating complex models on small data sets; suggesting the potential for worse performance when fit to new data. <strong>Good information on the number of subjects required to fit predictive models</strong> for <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/sim.7993">continuous</a> and <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/sim.7992">binary</a> outcomes to limit overfitting can be found in this excellent set of papers by Richard Riley and colleagues.</p>
+<p>Calibration is an integral component of model validation and aims to gauge how well the model predictions fit observed data (over the full range of values). Bootstrap resampling can be used to obtain out-of-sample estimates of model performance for calibration as well.</p>
+<p>rms::calibrate() uses bootstrapping or cross-validation to get bias-corrected (overfitting-corrected) estimates of predicted vs. observed values based on sub-setting predictions over a sequence of predicted values. The function shows the ideal, apparent, and optimism-corrected calibration curves. It also provides a histogram highlighting the density of predictions.</p>
+<p>Here is an example.</p>
+<pre class="r"><code>cal &lt;- calibrate(m4, B = 200)
+plot(cal)</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/m1_cal-1.png" width="672" /></p>
+<pre><code>## 
+## n=6497   Mean absolute error=0.003   Mean squared error=1e-05
+## 0.9 Quantile of absolute error=0.007</code></pre>
+<p><br></p>
+<p>The model looks to fit well over the range of predicted probabilities. Thus, given the limited optimism, and excellent calibration, we might expect this model to perform well in a new sample.</p>
+<p><br>
+<br></p>
+</div>
+<div id="tip-4.-penalized-regression-with-rmspentrace" class="section level1">
+<h1>Tip 4. Penalized regression with rms::pentrace()</h1>
+<p><br></p>
+<p>Penalized regression can be used to improve the performance of a model when fit to new data by reducing the impact of extreme coefficients. This is a form of <strong>bias-variance trade-off</strong> off where we can downwardly bias the coefficients to improve the error in new data. Penalized regression is similar to ridge regression in that it is an “L-2” penalty that leaves all terms in the model, but shrinks them towards zero. It is implemented here using penalized maximum likelihood estimation. For those of you familiar with Bayesian statistics, this approach can be thought of as a “frequentist way” to bring in the idea of a “skeptical prior” into the model building exercise. The less weight we want to assign to the raw coefficients, the more we can shrink them. The benefits being potentially improved predictions in new data and reduced effective degrees of freedom. However, there is some work to from <a href="https://arxiv.org/abs/1907.11493">Ben Van Calster, Maarten van Smeden, Ewout W. Steyerberg</a> for example, that suggest that while shrinkage improves predictions on average, it can perform poorly in individual datasets and does not typically solve problems associated with small sample size or low number of events per variable. So it is not a panacea for not collecting enough data.</p>
+<p>A particularly useful function in rms::pentrace() is that the main effect terms can receive different penalties (shrinkage factors) than, for example, the non-linear terms or interactions. Thus, it provides a very nice approach to allow for model complexity, while shrinking some/all estimates depending on need.</p>
+<p>While for these data little adjustment for overfitting is needed, we will apply pentrace function for instructional purposes. Here the AIC.c is sought to be <strong>maximized</strong> and the penalty value identified via a grid search. We see that little penalization is required to achieve the maximum AIC.c and that the effective d.f. are reduced in the penalized models.</p>
+<p><br></p>
+<pre class="r"><code>pentrace(m4, seq(.01, .1, by = .01))</code></pre>
+<pre><code>## 
+## Best penalty:
+## 
+##  penalty       df
+##     0.01 4.981253
+## 
+##  penalty       df      aic      bic    aic.c
+##     0.00 5.000000 2317.119 2283.224 2317.110
+##     0.01 4.981253 2317.137 2283.369 2317.128
+##     0.02 4.963194 2317.118 2283.472 2317.109
+##     0.03 4.945779 2317.066 2283.538 2317.057
+##     0.04 4.928972 2316.984 2283.570 2316.975
+##     0.05 4.912738 2316.876 2283.572 2316.867
+##     0.06 4.897045 2316.743 2283.546 2316.735
+##     0.07 4.881863 2316.590 2283.495 2316.581
+##     0.08 4.867167 2316.417 2283.422 2316.408
+##     0.09 4.852930 2316.227 2283.328 2316.218
+##     0.10 4.839131 2316.021 2283.217 2316.013</code></pre>
+<pre class="r"><code>m5 &lt;- update(m4, penalty = .01)
+m5</code></pre>
+<pre><code>## Logistic Regression Model
+##  
+##  lrm(formula = red_wine ~ rcs(pH, 3) + rcs(sulphates, 3) + pH %ia% 
+##      sulphates, data = mydata, x = TRUE, y = TRUE, penalty = 0.01)
+##  
+##  
+##  Penalty factors
+##  
+##   simple nonlinear interaction nonlinear.interaction
+##     0.01      0.01        0.01                  0.01
+##  
+##                       Model Likelihood     Discrimination    Rank Discrim.    
+##                          Ratio Test           Indexes           Indexes       
+##  Obs          6497    LR chi2  2327.10     R2       0.448    C       0.866    
+##   0           4898    d.f.       4.981     g        2.649    Dxy     0.733    
+##   1           1599    Pr(&gt; chi2)&lt;0.0001    gr      14.138    gamma   0.733    
+##  max |deriv| 1e-11    Penalty     1.15     gp       0.272    tau-a   0.272    
+##                                            Brier    0.124                     
+##  
+##                 Coef     S.E.   Wald Z Pr(&gt;|Z|) Penalty Scale
+##  Intercept      -63.7296 4.9458 -12.89 &lt;0.0001  0.0000       
+##  pH              15.5212 1.4868  10.44 &lt;0.0001  0.0161       
+##  pH&#39;             -5.0190 0.7531  -6.66 &lt;0.0001  0.0140       
+##  sulphates       58.7949 6.4401   9.13 &lt;0.0001  0.0149       
+##  sulphates&#39;     -17.6434 1.4195 -12.43 &lt;0.0001  0.0127       
+##  pH * sulphates -10.3680 1.8527  -5.60 &lt;0.0001  0.0499       
+## </code></pre>
+<p><br></p>
+<pre class="r"><code>pentrace(m4, list(simple = 0.01, nonlinear = c(0, 0.01, 0.02, 0.03), interaction = c(0, 0.01, 0.02, 0.03)))</code></pre>
+<pre><code>## 
+## Best penalty:
+## 
+##  simple nonlinear interaction       df
+##    0.01      0.02        0.02 4.972499
+## 
+##  simple nonlinear interaction       df      aic      bic    aic.c
+##    0.01      0.01        0.01 4.981253 2317.137 2283.369 2317.128
+##    0.01      0.01        0.02 4.972933 2317.139 2283.427 2317.130
+##    0.01      0.02        0.02 4.972499 2317.139 2283.430 2317.130
+##    0.01      0.01        0.03 4.964759 2317.136 2283.479 2317.127
+##    0.01      0.02        0.03 4.964326 2317.136 2283.483 2317.127
+##    0.01      0.03        0.03 4.963893 2317.137 2283.486 2317.127</code></pre>
+<pre class="r"><code>m6 &lt;- update(m4, penalty = .01)
+m6</code></pre>
+<pre><code>## Logistic Regression Model
+##  
+##  lrm(formula = red_wine ~ rcs(pH, 3) + rcs(sulphates, 3) + pH %ia% 
+##      sulphates, data = mydata, x = TRUE, y = TRUE, penalty = 0.01)
+##  
+##  
+##  Penalty factors
+##  
+##   simple nonlinear interaction nonlinear.interaction
+##     0.01      0.01        0.01                  0.01
+##  
+##                       Model Likelihood     Discrimination    Rank Discrim.    
+##                          Ratio Test           Indexes           Indexes       
+##  Obs          6497    LR chi2  2327.10     R2       0.448    C       0.866    
+##   0           4898    d.f.       4.981     g        2.649    Dxy     0.733    
+##   1           1599    Pr(&gt; chi2)&lt;0.0001    gr      14.138    gamma   0.733    
+##  max |deriv| 1e-11    Penalty     1.15     gp       0.272    tau-a   0.272    
+##                                            Brier    0.124                     
+##  
+##                 Coef     S.E.   Wald Z Pr(&gt;|Z|) Penalty Scale
+##  Intercept      -63.7296 4.9458 -12.89 &lt;0.0001  0.0000       
+##  pH              15.5212 1.4868  10.44 &lt;0.0001  0.0161       
+##  pH&#39;             -5.0190 0.7531  -6.66 &lt;0.0001  0.0140       
+##  sulphates       58.7949 6.4401   9.13 &lt;0.0001  0.0149       
+##  sulphates&#39;     -17.6434 1.4195 -12.43 &lt;0.0001  0.0127       
+##  pH * sulphates -10.3680 1.8527  -5.60 &lt;0.0001  0.0499       
+## </code></pre>
+<pre class="r"><code>effective.df(m6)</code></pre>
+<pre><code>## 
+## Original and Effective Degrees of Freedom
+## 
+##                          Original Penalized
+## All                             5      4.98
+## Simple Terms                    2      1.99
+## Interaction or Nonlinear        3      2.99
+## Nonlinear                       2      2.00
+## Interaction                     1      0.99
+## Nonlinear Interaction           0      0.00</code></pre>
+<p><br>
+<br></p>
+</div>
+<div id="tip-5.-models-other-than-ols-for-continuous-or-semi-continuous-y" class="section level1">
+<h1>Tip 5. Models other than OLS for continuous or semi-continuous Y</h1>
+<p><br></p>
+<p>A nice feature of the rms package is that one can use it to fit a wide range of models. For example, if we want to make predictions regarding a conditional quantile, rms wraps Roger Koenker’s <a href="https://cran.r-project.org/web/packages/quantreg/index.html">quantreg package</a> allowing for most of the benefits of the rms package to applied to quantile regression models. The only limitation I am aware of is that when using rms one can only model a single value of tau (quantile) at a time. If one wishes to model ordinal or semi-continuous data, the rms::orm() function fits ordinal cumulative probability models for continuous or ordinal response variables. In addition, the package can be used to fit OLS regression, survival models, generalized least squares for longitudinal data, etc.</p>
+<p>Models other than OLS may come in handy when modeling a continuous outcome and one want to make “less restrictive” assumptions regarding the distribution of Y given X. Quantile regression only requires that Y|X be continuous. The proportional odds model only assumes that the association is the same for all outcome groups (i.e. proportional odds or parallel regression assumption). So, if one does not want to rely on the central limit theorem when making predictions, these alternative approaches can be considered depending on your goals.</p>
+<p>Below we fit a fairly simple two-term model with non-linear terms and interactions to predict values of residual sugar from pH and sulphates. OLS, ordinal, and quantile regression models are fit to the data and various predictions made.</p>
+<pre class="r"><code>lm1 &lt;- ols(residual_sugar ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, data = mydata, x = TRUE, y = TRUE) 
+print(lm1, coefs = FALSE)</code></pre>
+<pre><code>## Linear Regression Model
+##  
+##  ols(formula = residual_sugar ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, 
+##      data = mydata, x = TRUE, y = TRUE)
+##  
+##                 Model Likelihood     Discrimination    
+##                    Ratio Test           Indexes        
+##  Obs    6497    LR chi2    710.48    R2       0.104    
+##  sigma4.5074    d.f.            8    R2 adj   0.102    
+##  d.f.   6488    Pr(&gt; chi2) 0.0000    g        1.719    
+##  
+##  Residuals
+##  
+##     Min     1Q Median     3Q    Max 
+##  -9.967 -3.202 -1.174  2.444 62.425 
+## </code></pre>
+<pre class="r"><code>r &lt;- mydata
+r$resid &lt;- resid(lm1)
+r$fitted &lt;- fitted(lm1)
+
+r1 &lt;- ggplot(data = r, aes(x = fitted, y = resid)) + geom_point() + geom_smooth()
+r2 &lt;- ggplot(data = r, aes(x = pH, y = resid)) + geom_point() + geom_smooth()
+r3 &lt;- ggplot(data = r, aes(x = sulphates, y = resid)) + geom_point() + geom_smooth()
+r4 &lt;- ggplot(data = r, aes(sample = resid)) + stat_qq() + geom_abline(intercept = mean(r$resid), slope = sd(r$resid))
+cowplot::plot_grid(r1, r2, r3, r4, nrow = 2, ncol = 2, scale = .9)</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/lm-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(Predict(lm1, sulphates, pH = c(3, 3.2, 3.4)))</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/lm-2.png" width="672" /></p>
+<p><br>
+We can see above that neither the r-squared value nor the model fit is great. However, the effect of pH and sulphates does look to interact in a non-linear manner when predicting residual sugar. We could further examine the model predictions at this time or consider some type of transformation, etc. or alternative model.</p>
+<p>We will fit a log-log proportional odds model as implemented by rms::orm() to these data and obtain mean and median predictions for residual sugar as a function of pH and sulphates.</p>
+<pre class="r"><code>orm1 &lt;- orm(residual_sugar ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, data = mydata, x = TRUE, y = TRUE) 
+print(orm1, coefs = FALSE)</code></pre>
+<pre><code>## Logistic (Proportional Odds) Ordinal Regression Model
+##  
+##  orm(formula = residual_sugar ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, 
+##      data = mydata, x = TRUE, y = TRUE)
+##  
+##                        Model Likelihood          Discrimination          Rank Discrim.    
+##                           Ratio Test                 Indexes                Indexes       
+##  Obs          6497    LR chi2     476.63    R2                  0.071    rho     0.268    
+##  Distinct Y    316    d.f.             8    g                   0.542                     
+##  Median Y        3    Pr(&gt; chi2) &lt;0.0001    gr                  1.720                     
+##  max |deriv| 2e-05    Score chi2  482.68    |Pr(Y&gt;=median)-0.5| 0.098                     
+##                       Pr(&gt; chi2) &lt;0.0001</code></pre>
+<pre class="r"><code>M &lt;- Mean(orm1)
+qu &lt;- Quantile(orm1)
+med &lt;- function(x) qu(0.5, x)
+p1 &lt;- ggplot(Predict(orm1, sulphates, pH = c(3, 3.2, 3.4), fun = M)) + coord_cartesian(ylim = c(1, 8))
+p2 &lt;- ggplot(Predict(orm1, sulphates, pH = c(3, 3.2, 3.4), fun = med)) + coord_cartesian(ylim = c(1, 8))
+plot_grid(p1, p2, nrow = 1, ncol = 2, scale = 0.9, labels = c(&quot;ORM: Mean&quot;, &quot;ORM: Median&quot;))</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/orm-1.png" width="672" /></p>
+<p><br></p>
+<p>We generally see the same pattern as we did with OLS.</p>
+<p>No lets try the rms::Rq function to predcit the median value from this same set of predictors.</p>
+<pre class="r"><code>rq1 &lt;- Rq(residual_sugar ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, data = mydata, x = TRUE, y = TRUE, tau = 0.5) 
+print(rq1, coefs = FALSE)</code></pre>
+<pre><code>## Quantile Regression      tau: 0.5
+##  
+##  Rq(formula = residual_sugar ~ (rcs(pH, 3) + rcs(sulphates, 3))^2, 
+##      tau = 0.5, data = mydata, x = TRUE, y = TRUE)
+##  
+##                            Discrimination    
+##                                Index         
+##  Obs               6497    g        1.971    
+##  p                    9                      
+##  Residual d.f.     6488                      
+##  mean |Y-Yhat| 3.345058</code></pre>
+<pre class="r"><code>ggplot(Predict(rq1, sulphates, pH = c(3, 3.2, 3.4)))</code></pre>
+<p><img src="/post/2019-09-03-an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages_files/figure-html/rq-1.png" width="672" /></p>
+<p><br>
+At this point we could compare the optimism-corrected estimates of model performance and the calibration curves to assess performance. We could also model other quantiles by changing tau to see if the impact of the predictors differs across quantiles of residual sugar.</p>
+<p><br>
+<br></p>
+</div>
+<div id="bonus-taking-predictions-outside-of-r" class="section level1">
+<h1>Bonus: taking predictions outside of R</h1>
+<p><br></p>
+<p>If you want to take your predictions outside of R, to drop them into a java script for web-based visualization for example, the rms::Function() will output the R code used to make the model predictions.</p>
+<p><br></p>
+<pre class="r"><code>(pred_logit &lt;- Function(m4))</code></pre>
+<pre><code>## function (pH = 3.21, sulphates = 0.51) 
+## {
+##     -64.339385 + 15.699039 * pH - 31.487899 * pmax(pH - 3.02, 
+##         0)^3 + 59.976951 * pmax(pH - 3.21, 0)^3 - 28.489052 * 
+##         pmax(pH - 3.42, 0)^3 + 59.695226 * sulphates - 144.55604 * 
+##         pmax(sulphates - 0.37, 0)^3 + 240.92673 * pmax(sulphates - 
+##         0.51, 0)^3 - 96.370692 * pmax(sulphates - 0.72, 0)^3 - 
+##         10.624164 * pH * sulphates
+## }
+## &lt;environment: 0x7ff2193b0d60&gt;</code></pre>
+<p><br>
+<br></p>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<p><br></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.6.0 (2019-04-26)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS Mojave 10.14.5
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] cowplot_1.0.0     ucidata_0.0.3     rms_5.1-3.1      
+##  [4] SparseM_1.77      Hmisc_4.2-0       Formula_1.2-3    
+##  [7] survival_2.44-1.1 lattice_0.20-38   forcats_0.4.0    
+## [10] stringr_1.4.0     dplyr_0.8.0.1     purrr_0.3.2      
+## [13] readr_1.3.1       tidyr_0.8.3       tibble_2.1.1     
+## [16] ggplot2_3.1.1     tidyverse_1.2.1  
+## 
+## loaded via a namespace (and not attached):
+##  [1] httr_1.4.0          jsonlite_1.6        splines_3.6.0      
+##  [4] modelr_0.1.4        assertthat_0.2.1    latticeExtra_0.6-28
+##  [7] cellranger_1.1.0    yaml_2.2.0          pillar_1.3.1       
+## [10] backports_1.1.4     quantreg_5.38       glue_1.3.1         
+## [13] digest_0.6.18       RColorBrewer_1.1-2  checkmate_1.9.3    
+## [16] rvest_0.3.3         colorspace_1.4-1    sandwich_2.5-1     
+## [19] htmltools_0.3.6     Matrix_1.2-17       plyr_1.8.4         
+## [22] pkgconfig_2.0.2     broom_0.5.2         haven_2.1.0        
+## [25] bookdown_0.11       mvtnorm_1.0-10      scales_1.0.0       
+## [28] MatrixModels_0.4-1  htmlTable_1.13.1    mgcv_1.8-28        
+## [31] generics_0.0.2      TH.data_1.0-10      withr_2.1.2        
+## [34] nnet_7.3-12         lazyeval_0.2.2      cli_1.1.0          
+## [37] magrittr_1.5        crayon_1.3.4        readxl_1.3.1       
+## [40] polspline_1.1.14    evaluate_0.13       MASS_7.3-51.4      
+## [43] nlme_3.1-139        xml2_1.2.0          foreign_0.8-71     
+## [46] blogdown_0.13       tools_3.6.0         data.table_1.12.2  
+## [49] hms_0.4.2           multcomp_1.4-10     munsell_0.5.0      
+## [52] cluster_2.0.8       compiler_3.6.0      rlang_0.4.0        
+## [55] grid_3.6.0          rstudioapi_0.10     htmlwidgets_1.3    
+## [58] labeling_0.3        base64enc_0.1-3     rmarkdown_1.12     
+## [61] codetools_0.2-16    gtable_0.3.0        R6_2.4.0           
+## [64] gridExtra_2.3       zoo_1.8-5           lubridate_1.7.4    
+## [67] knitr_1.22          stringi_1.4.3       Rcpp_1.0.1         
+## [70] rpart_4.1-15        acepack_1.4.1       tidyselect_0.2.5   
+## [73] xfun_0.6</code></pre>
+</div>

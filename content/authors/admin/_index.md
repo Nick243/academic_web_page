@@ -74,4 +74,7 @@ user_groups:
 - Visitors
 ---
 
-Nicholas Ollberding is a quantitative epidemiologist with applied research interests investigating the role of diet in the etiology and progression of chronic disease and the role of the developing infant intestinal microbiome on growth and early development. Areas of methodical research interest include the development and application of analytical methods for microbial metagenomic next-generation sequence data and dietary assessment and analysis methodology. He also collaborates broadly as a quantitative methodologist and statistician in the area of health sciences research and leads the Biostatistics Core of the Heart Institute Research Core at Cincinnati Children’s Hospital Medical Center.
+Nicholas Ollberding is an epidemiologist with applied research interests into the role of diet in the etiology and progression of chronic disease and the impact of the developing infant intestinal microbiome on growth and early development. Areas of methodical research interest include the application and development of analytical methods for microbial metagenomic next-generation sequence data, dietary assessment and analysis methodology, predictive modeling, and casual inference. He also collaborates broadly as a quantitative methodologist in the area of health sciences research and leads the Biostatistics Core of the Heart Institute Research Core at Cincinnati Children’s Hospital Medical Center.
+
+All thoughts and opinions expressed here are my own and not the views of Cincinnati Children’s Hospital Medical Center or the University of Cincinnati.
+

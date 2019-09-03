@@ -19,13 +19,59 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2019-08-21T11:41:10-04:00</lastmod>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
+    <loc>/post/an-introduction-to-the-harrell-verse-predictive-modeling-using-the-hmisc-and-rms-packages/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/categories/</loc>
-    <lastmod>2019-08-21T11:41:10-04:00</lastmod>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/data-analysis/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/hmisc/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/predictive-modeling/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/rms/</loc>
+    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -53,24 +99,7 @@
   </url>
   
   <url>
-    <loc>/post/</loc>
-    <lastmod>2019-08-21T11:41:10-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2019-08-21T11:41:10-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/tags/sra/</loc>
-    <lastmod>2019-08-21T11:41:10-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2019-08-21T11:41:10-04:00</lastmod>
     <priority>0</priority>
   </url>
@@ -95,12 +124,6 @@
   <url>
     <loc>/tags/dada2/</loc>
     <lastmod>2019-07-28T22:23:51-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/data-analysis/</loc>
-    <lastmod>2019-07-28T22:25:53-04:00</lastmod>
     <priority>0</priority>
   </url>
   
