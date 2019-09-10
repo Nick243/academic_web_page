@@ -149,25 +149,286 @@
   </url>
   
   <url>
-    <loc>/authors/admin/</loc>
-  </url>
-  
-  <url>
-    <loc>/authors/</loc>
+    <loc>/publication_types/2/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/courses/</loc>
+    <loc>/authors/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/publication/ajcn-gehm/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/brenna-jt/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/davidson-bs/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/dingess-ka/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/guerrero-ml/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/mcmahon-rj/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/morrow-al/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/nutrition/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/nutrition/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/ollberding-nj/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/peng-ym/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>
     <loc>/publication_types/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/publication/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/ran-ressler-rr/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/ruiz-palacios-gm/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/summer-s/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/valentine-cj/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/woo-jg/</loc>
+    <lastmod>2017-01-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/kumar-r/</loc>
+    <lastmod>2016-06-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/macaluso-m/</loc>
+    <lastmod>2016-06-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/morrow-c/</loc>
+    <lastmod>2016-06-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/piyathilake-cj/</loc>
+    <lastmod>2016-06-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/tylavsky-fa/</loc>
+    <lastmod>2016-06-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/publication/candle-study/</loc>
+    <lastmod>2016-06-01T13:51:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/volgyi-e/</loc>
+    <lastmod>2016-06-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/alvarez-rd/</loc>
+    <lastmod>2016-05-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/cancer/</loc>
+    <lastmod>2016-05-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/publication/cervical-mb/</loc>
+    <lastmod>2016-05-01T13:51:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/morrow-cd/</loc>
+    <lastmod>2016-05-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/hawkins-ja/</loc>
+    <lastmod>2016-03-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/helmrath-ma/</loc>
+    <lastmod>2016-03-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/karns-r/</loc>
+    <lastmod>2016-03-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/mezoff-ea/</loc>
+    <lastmod>2016-03-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/publication/ethan-2fl/</loc>
+    <lastmod>2016-03-01T13:51:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/gilsanz-v/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/kalkwarf-hj/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/lappe-jm/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/methods/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/oberfield-se/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/publication/jand-intermethod/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/shepherd-ja/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/winer-kk/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/zemel-bs/</loc>
+    <lastmod>2015-04-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/couch-sc/</loc>
+    <lastmod>2014-11-01T13:51:08-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/publication/jand-within/</loc>
+    <lastmod>2014-11-01T13:51:08-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/admin/</loc>
+  </url>
+  
+  <url>
+    <loc>/courses/</loc>
   </url>
   
   <url>

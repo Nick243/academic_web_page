@@ -58,6 +58,9 @@ social:
 - icon: github
   icon_pack: fab
   link: https://github.com/Nick243
+- icon: researchgate
+  icon_pack: ai
+  link: https://www.researchgate.net/profile/Nicholas_Ollberding
 # Link to a PDF of your resume/CV from the About widget.
 # To enable, copy your resume/CV to `static/files/cv.pdf` and uncomment the lines below.  
 # - icon: cv
@@ -76,5 +79,6 @@ user_groups:
 
 Nicholas Ollberding is an epidemiologist with applied research interests into the role of diet in the etiology and progression of chronic disease and the impact of the developing infant intestinal microbiome on growth and early development. Areas of methodical research interest include the application and development of analytical methods for microbial metagenomic next-generation sequence data, dietary assessment and analysis methodology, predictive modeling, and casual inference. He also collaborates broadly as a quantitative methodologist in the area of health sciences research and leads the Biostatistics Core of the Heart Institute Research Core at Cincinnati Children’s Hospital Medical Center.
 
-All thoughts and opinions expressed here are my own and not the views of Cincinnati Children’s Hospital Medical Center or the University of Cincinnati.
+All thoughts and opinions expressed here are my own and do not reflect the views of Cincinnati Children’s Hospital Medical Center or the University of Cincinnati.
 
+A full list of publications can be found on Google Scholar or [here](https://www.ncbi.nlm.nih.gov/sites/myncbi/nicholas.ollberding.1/bibliography/40113389/public/?sort=date&direction=ascending).

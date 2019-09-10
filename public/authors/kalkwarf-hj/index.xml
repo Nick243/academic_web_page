@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Kalkwarf HJ on </title>
+    <link>/authors/kalkwarf-hj/</link>
+    <description>Recent content in Kalkwarf HJ on </description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 01 Apr 2015 13:51:08 -0400</lastBuildDate>
+    
+	    <atom:link href="/authors/kalkwarf-hj/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Reproducibility and intermethod reliability of a calcium food frequency questionnaire for use in Hispanic, non-Hispanic Black, and non-Hispanic White youth</title>
+      <link>/publication/jand-intermethod/</link>
+      <pubDate>Wed, 01 Apr 2015 13:51:08 -0400</pubDate>
+      
+      <guid>/publication/jand-intermethod/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Within- and between-individual variation in nutrient intake in children and adolescents</title>
+      <link>/publication/jand-within/</link>
+      <pubDate>Sat, 01 Nov 2014 13:51:08 -0400</pubDate>
+      
+      <guid>/publication/jand-within/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

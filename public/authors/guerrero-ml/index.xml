@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Guerrero ML on </title>
+    <link>/authors/guerrero-ml/</link>
+    <description>Recent content in Guerrero ML on </description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 01 Jan 2017 13:51:08 -0400</lastBuildDate>
+    
+	    <atom:link href="/authors/guerrero-ml/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Branched-chain fatty acid composition of human milk and the impact of maternal diet: the Global Exploration of Human Milk (GEHM) Study</title>
+      <link>/publication/ajcn-gehm/</link>
+      <pubDate>Sun, 01 Jan 2017 13:51:08 -0400</pubDate>
+      
+      <guid>/publication/ajcn-gehm/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
