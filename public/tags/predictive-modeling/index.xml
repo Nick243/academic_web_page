@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Predictive Modeling on </title>
+    <link>/tags/predictive-modeling/</link>
+    <description>Recent content in Predictive Modeling on </description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 06 Nov 2019 15:42:06 +0000</lastBuildDate>
+    
+	    <atom:link href="/tags/predictive-modeling/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>An Introduction to the Harrell“verse”: Predictive Modeling using the Hmisc and rms Packages</title>
+      <link>/talk/cchmc_rug/</link>
+      <pubDate>Wed, 06 Nov 2019 15:42:06 +0000</pubDate>
+      
+      <guid>/talk/cchmc_rug/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

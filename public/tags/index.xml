@@ -120,6 +120,24 @@
     </item>
     
     <item>
+      <title>Causal Inference</title>
+      <link>/tags/causal-inference/</link>
+      <pubDate>Tue, 19 Jan 2016 15:42:06 +0000</pubDate>
+      
+      <guid>/tags/causal-inference/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>DAGs</title>
+      <link>/tags/dags/</link>
+      <pubDate>Tue, 19 Jan 2016 15:42:06 +0000</pubDate>
+      
+      <guid>/tags/dags/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Methods</title>
       <link>/tags/methods/</link>
       <pubDate>Wed, 01 Apr 2015 13:51:08 -0400</pubDate>

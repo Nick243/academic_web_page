@@ -529,5 +529,14 @@ otu_table(ps_relabund)[1:5, 1:5]&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
+    <item>
+      <title>Introduction to Denoising Amplicon Sequence Data in R</title>
+      <link>/talk/test-talk/</link>
+      <pubDate>Wed, 10 Jul 2019 15:42:06 +0000</pubDate>
+      
+      <guid>/talk/test-talk/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>

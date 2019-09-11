@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nicholas Ollberding on </title>
+    <link>/authors/nicholas-ollberding/</link>
+    <description>Recent content in Nicholas Ollberding on </description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 15 Jul 2019 15:42:06 +0000</lastBuildDate>
+    
+	    <atom:link href="/authors/nicholas-ollberding/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Introduction to Microbiome Data Analysis </title>
+      <link>/talk/into-mb-stats/</link>
+      <pubDate>Mon, 15 Jul 2019 15:42:06 +0000</pubDate>
+      
+      <guid>/talk/into-mb-stats/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Introduction to Denoising Amplicon Sequence Data in R</title>
+      <link>/talk/test-talk/</link>
+      <pubDate>Wed, 10 Jul 2019 15:42:06 +0000</pubDate>
+      
+      <guid>/talk/test-talk/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Recent Advancements in the Statistical Analysis of Microbial Metagenomic Sequence Data</title>
+      <link>/talk/dhc/</link>
+      <pubDate>Tue, 23 Apr 2019 15:42:06 +0000</pubDate>
+      
+      <guid>/talk/dhc/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>A Primer on Directed Acyclic Graphs</title>
+      <link>/talk/dags/</link>
+      <pubDate>Tue, 19 Jan 2016 15:42:06 +0000</pubDate>
+      
+      <guid>/talk/dags/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
