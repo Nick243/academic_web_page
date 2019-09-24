@@ -4,13 +4,13 @@
 title: "Recent Advancements in the Statistical Analysis of Microbial Metagenomic Sequence Data"
 event: "CCHMC Digestive Health Center Seminar Series"
 event_url: ""
-location: "Division of Gastroenterology, Hepatology and Nutrition, Cincinnati Children's Hospital Medical Center"
+location: "CCHMC Location S Room 6.125"
 summary: ""
 abstract: "These slides are from an invited talk I gave to the Division of Gastroenterology, Hepatology and Nutrition at CCHMC as part of their Digestive Health Center Seminar Series. Topics covered in this talk include an introduction to denoising amplicon sequence variants, shallow shotgun metagenomics, processing long read data with PacBio and DADA2, compositional data analysis using log-ratio methodologies, analyzing longitudinal microbiome data, and a quick introduction to Qiita. In general, the talk is a potpourri of various issues (and potential ways forward) of interest to researches in the division."
 
 # Talk start and end times.
 #   End time can optionally be hidden by prefixing the line with `#`.
-date: 2019-04-23T15:42:06-00:00
+date: 2019-04-23T12:00:00-00:00
 #date_end: 2019-09-11T15:42:06-04:00
 all_day: false
 

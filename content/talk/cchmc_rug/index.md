@@ -6,16 +6,16 @@ event: "Cincinnati Children’s Hospital Medical Center R Users Group"
 event_url: "https://github.com/CCHMC-RUG"
 location: "T11.338"
 summary: ""
-abstract: "This is a link to a talk I will be giving to the Cincinnati Children’s Hospital Medical Center R Users Group on November 6th, 2019.  The goal of the talk is to introduce members to some of the functionality provided by Frank Harrell’s Hmisc and rms packages for data description and predictive modeling. Topics covered include examining your data with Hmisc, regression modeling allowing for complexity with rms, validating fitted models with rms::validate() and rms:calibrate(), penalized regression with rms::pentrace(), and models other than OLS for continuous or semi-continuous Y in rms. As of now, I plan on presenting this talk as a blog post generated via the R blogdown package (.rmd) and hosted on my website. So the slides link below will talk you to the blog post."
+abstract: "This is a link to a talk I will be giving to the Cincinnati Children’s Hospital Medical Center R Users Group on November 6th, 2019.  The goal of the talk is to introduce members to some of the functionality provided by Frank Harrell’s Hmisc and rms packages for data description and predictive modeling. Topics covered include examining your data with Hmisc, regression modeling allowing for complexity with rms, validating fitted models with rms::validate() and rms:calibrate(), penalized regression with rms::pentrace(), and models other than OLS for continuous or semi-continuous Y in rms. As of now, I plan on presenting this talk as a blog post generated via the R blogdown package (.rmd) and hosted on my website. So the slides link above will talk you to the blog post."
 
 # Talk start and end times.
 #   End time can optionally be hidden by prefixing the line with `#`.
-date: 2019-11-06T15:42:06-00:00
+date: 2019-11-06T12:00:00-00:00
 #date_end: 2019-09-11T15:42:06-04:00
 all_day: false
 
 # Schedule page publish date (NOT talk date).
-publishDate: 2019-11-06T15:42:06-00:00
+publishDate: 2019-06-06T15:42:06-00:00
 
 authors: [Nicholas Ollberding]
 tags: [Predictive Modeling, R, rms, Hmisc]

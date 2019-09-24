@@ -10,7 +10,7 @@ abstract: "This was a talk given as part of the UC-CCHMC introductory workshop c
 
 # Talk start and end times.
 #   End time can optionally be hidden by prefixing the line with `#`.
-date: 2019-07-10T15:42:06-00:00
+date: 2019-07-10T13:00:00-00:00
 #date_end: 2019-09-11T15:42:06-04:00
 all_day: false
 

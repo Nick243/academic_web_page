@@ -6,15 +6,24 @@
     <description>Recent content in Nicholas Ollberding on </description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 15 Jul 2019 15:42:06 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 06 Nov 2019 12:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/authors/nicholas-ollberding/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>An Introduction to the Harrell“verse”: Predictive Modeling using the Hmisc and rms Packages</title>
+      <link>/talk/cchmc_rug/</link>
+      <pubDate>Wed, 06 Nov 2019 12:00:00 +0000</pubDate>
+      
+      <guid>/talk/cchmc_rug/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Introduction to Microbiome Data Analysis </title>
       <link>/talk/into-mb-stats/</link>
-      <pubDate>Mon, 15 Jul 2019 15:42:06 +0000</pubDate>
+      <pubDate>Mon, 15 Jul 2019 13:00:00 +0000</pubDate>
       
       <guid>/talk/into-mb-stats/</guid>
       <description></description>
@@ -23,7 +32,7 @@
     <item>
       <title>Introduction to Denoising Amplicon Sequence Data in R</title>
       <link>/talk/test-talk/</link>
-      <pubDate>Wed, 10 Jul 2019 15:42:06 +0000</pubDate>
+      <pubDate>Wed, 10 Jul 2019 13:00:00 +0000</pubDate>
       
       <guid>/talk/test-talk/</guid>
       <description></description>
@@ -32,7 +41,7 @@
     <item>
       <title>Recent Advancements in the Statistical Analysis of Microbial Metagenomic Sequence Data</title>
       <link>/talk/dhc/</link>
-      <pubDate>Tue, 23 Apr 2019 15:42:06 +0000</pubDate>
+      <pubDate>Tue, 23 Apr 2019 12:00:00 +0000</pubDate>
       
       <guid>/talk/dhc/</guid>
       <description></description>
@@ -41,7 +50,7 @@
     <item>
       <title>A Primer on Directed Acyclic Graphs</title>
       <link>/talk/dags/</link>
-      <pubDate>Tue, 19 Jan 2016 15:42:06 +0000</pubDate>
+      <pubDate>Tue, 19 Jan 2016 13:00:00 +0000</pubDate>
       
       <guid>/talk/dags/</guid>
       <description></description>

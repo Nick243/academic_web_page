@@ -19,7 +19,59 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/talk/cchmc_rug/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/authors/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/hmisc/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/authors/nicholas-ollberding/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/predictive-modeling/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/talk/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/rms/</loc>
+    <lastmod>2019-11-06T12:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -41,36 +93,12 @@
   </url>
   
   <url>
-    <loc>/tags/hmisc/</loc>
-    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/post/</loc>
     <lastmod>2019-09-03T14:18:59-04:00</lastmod>
   </url>
   
   <url>
     <loc>/categories/predictive-modeling/</loc>
-    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
-    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2019-09-03T14:18:59-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/rms/</loc>
     <lastmod>2019-09-03T14:18:59-04:00</lastmod>
     <priority>0</priority>
   </url>
@@ -138,35 +166,18 @@
   </url>
   
   <url>
-    <loc>/authors/</loc>
-    <lastmod>2019-07-15T15:42:06+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/talk/into-mb-stats/</loc>
-    <lastmod>2019-07-15T15:42:06+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/authors/nicholas-ollberding/</loc>
-    <lastmod>2019-07-15T15:42:06+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/talk/</loc>
-    <lastmod>2019-07-15T15:42:06+00:00</lastmod>
+    <lastmod>2019-07-15T13:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/talk/test-talk/</loc>
-    <lastmod>2019-07-10T15:42:06+00:00</lastmod>
+    <lastmod>2019-07-10T13:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/talk/dhc/</loc>
-    <lastmod>2019-04-23T15:42:06+00:00</lastmod>
+    <lastmod>2019-04-23T12:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -387,18 +398,18 @@
   
   <url>
     <loc>/talk/dags/</loc>
-    <lastmod>2016-01-19T15:42:06+00:00</lastmod>
+    <lastmod>2016-01-19T13:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/causal-inference/</loc>
-    <lastmod>2016-01-19T15:42:06+00:00</lastmod>
+    <lastmod>2016-01-19T13:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/dags/</loc>
-    <lastmod>2016-01-19T15:42:06+00:00</lastmod>
+    <lastmod>2016-01-19T13:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

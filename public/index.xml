@@ -6,7 +6,7 @@
     <description>Recent content on </description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 03 Sep 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 06 Nov 2019 12:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -81,6 +81,15 @@
 
 &lt;p&gt;Aliquam in turpis accumsan, malesuada nibh ut, hendrerit justo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque sed erat nec justo posuere suscipit. Donec ut efficitur arcu, in malesuada neque. Nunc dignissim nisl massa, id vulputate nunc pretium nec. Quisque eget urna in risus suscipit ultricies. Pellentesque odio odio, tincidunt in eleifend sed, posuere a diam. Nam gravida nisl convallis semper elementum. Morbi vitae felis faucibus, vulputate orci placerat, aliquet nisi. Aliquam erat volutpat. Maecenas sagittis pulvinar purus, sed porta quam laoreet at.&lt;/p&gt;
 </description>
+    </item>
+    
+    <item>
+      <title>An Introduction to the Harrell“verse”: Predictive Modeling using the Hmisc and rms Packages</title>
+      <link>/talk/cchmc_rug/</link>
+      <pubDate>Wed, 06 Nov 2019 12:00:00 +0000</pubDate>
+      
+      <guid>/talk/cchmc_rug/</guid>
+      <description></description>
     </item>
     
     <item>
@@ -2976,7 +2985,7 @@ grid.draw(cv_sebal$global.plot)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Introduction to Microbiome Data Analysis </title>
       <link>/talk/into-mb-stats/</link>
-      <pubDate>Mon, 15 Jul 2019 15:42:06 +0000</pubDate>
+      <pubDate>Mon, 15 Jul 2019 13:00:00 +0000</pubDate>
       
       <guid>/talk/into-mb-stats/</guid>
       <description></description>
@@ -2985,7 +2994,7 @@ grid.draw(cv_sebal$global.plot)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Introduction to Denoising Amplicon Sequence Data in R</title>
       <link>/talk/test-talk/</link>
-      <pubDate>Wed, 10 Jul 2019 15:42:06 +0000</pubDate>
+      <pubDate>Wed, 10 Jul 2019 13:00:00 +0000</pubDate>
       
       <guid>/talk/test-talk/</guid>
       <description></description>
@@ -2994,7 +3003,7 @@ grid.draw(cv_sebal$global.plot)&lt;/code&gt;&lt;/pre&gt;
     <item>
       <title>Recent Advancements in the Statistical Analysis of Microbial Metagenomic Sequence Data</title>
       <link>/talk/dhc/</link>
-      <pubDate>Tue, 23 Apr 2019 15:42:06 +0000</pubDate>
+      <pubDate>Tue, 23 Apr 2019 12:00:00 +0000</pubDate>
       
       <guid>/talk/dhc/</guid>
       <description></description>
@@ -3221,7 +3230,7 @@ $$&lt;/p&gt;
     <item>
       <title>A Primer on Directed Acyclic Graphs</title>
       <link>/talk/dags/</link>
-      <pubDate>Tue, 19 Jan 2016 15:42:06 +0000</pubDate>
+      <pubDate>Tue, 19 Jan 2016 13:00:00 +0000</pubDate>
       
       <guid>/talk/dags/</guid>
       <description></description>

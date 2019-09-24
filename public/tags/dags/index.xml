@@ -6,7 +6,7 @@
     <description>Recent content in DAGs on </description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 19 Jan 2016 15:42:06 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 19 Jan 2016 13:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/tags/dags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>A Primer on Directed Acyclic Graphs</title>
       <link>/talk/dags/</link>
-      <pubDate>Tue, 19 Jan 2016 15:42:06 +0000</pubDate>
+      <pubDate>Tue, 19 Jan 2016 13:00:00 +0000</pubDate>
       
       <guid>/talk/dags/</guid>
       <description></description>

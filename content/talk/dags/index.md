@@ -10,7 +10,7 @@ abstract: "These slides were presented as part of the Division of Biostatistics 
 
 # Talk start and end times.
 #   End time can optionally be hidden by prefixing the line with `#`.
-date: 2016-01-19T15:42:06-00:00
+date: 2016-01-19T13:00:00-00:00
 #date_end: 2019-09-11T15:42:06-04:00
 all_day: false
 
